@@ -24,11 +24,12 @@ class Agent():
         self.total_visitations = dict.fromkeys(arm_set, 0)
 
     def UCB_network(self):
-        if self.t <= len(self.arm_set):
-            return self.arm_set[self.t]
+        # warm-up
+        if self.t < len(self.arm_set):
+            final_arm = self.arm_set[self.t]
         else:
             final_arm, tmp = None, 0
-            for arm in arm_set:
+            for arm in self.arm_set:
                 m = self.total_visitations[arm]
                 reward_estimate = self.total_rewards[arm] / m
                 bonus = np.sqrt(2 * np.log(self.t) / m)
@@ -36,16 +37,14 @@ class Agent():
                 if tmp < ucb:
                     final_arm = arm
                     tmp = ucb
-            message = self.pull(final_arm)
-            print("message: ", message)
-            return message
+        return self.pull(final_arm)
 
     def pull(self, arm):
         # update number of visitations
         self.total_visitations[arm] += 1
 
         # receive reward
-        if arm not in arm_set:
+        if arm not in self.arm_set:
             raise ValueError(f"{arm} not in the arm set attained by agent {self.idx}")
 
         # update reward
