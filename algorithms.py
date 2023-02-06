@@ -1,7 +1,6 @@
 from utils import *
 from tqdm import tqdm
-
-import os
+from copy import copy
 
 
 class Problem:
@@ -166,6 +165,8 @@ def run_ucb(problem, p):
                         gossip_neighbors = np.random.choice(effective_nbhd, size=n_gossip, replace=False)
                     # pass messages
                     for neighbor in gossip_neighbors:
+                        message_copy = copy(message)
+
                         # update communication complexity
                         Agents[i].communication += 1
                         # send messages
@@ -173,9 +174,9 @@ def run_ucb(problem, p):
                             Agents[neighbor].receive([None], Agents[i])
                         else:
                             if discard:
-                                Agents[neighbor].receive([message], Agents[i], min_deg / Network.degree[neighbor])
+                                Agents[neighbor].receive([message_copy], Agents[i], min_deg / Network.degree[neighbor])
                             else:
-                                Agents[neighbor].receive([message], Agents[i])
+                                Agents[neighbor].receive([message_copy], Agents[i])
 
         # collect regrets and communications
         for i in range(N):

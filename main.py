@@ -1,8 +1,9 @@
 from algorithms import *
 from multiprocess import Pool
 import networkx as nx
+
 from itertools import product
-import time
+import os
 import argparse
 
 
@@ -19,7 +20,7 @@ def create_problem(Network, Agents, T, N, K, param):
     return Problem(Network, Agents, T, N, K, param)
 
 
-def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, n_repeats=10):
+def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, n_repeats):
     final_regrets_mean, final_regrets_std = [], []
     final_communications_mean, final_communications_std = [], []
 
@@ -30,7 +31,7 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
     else:
         raise ValueError("Are we fixing p or gamma?")
 
-    # discard, n_gossip, mp, repeats, ps
+    # discard, n_gossip, mp, gamma, p, repeat
     params = list(product(discards, n_gossips, mps, gammas, ps, range(n_repeats)))
 
     def F(param):
@@ -178,11 +179,12 @@ if __name__ == '__main__':
             # plt.show()
 
         # Experiment #1. Effect of varying p
-        ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]  # probability that a message is *not* discarded!
+        # ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]  # probability that a message is *not* discarded!
+        ps = [0.1, 0.5, 0.9, 1.0]  # probability that a message is *not* discarded!
         gammas = [3]  # number of rounds for message passing
         main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
 
         # Experiment #2. Effect of gamma, under perfect communication
-        gammas = [1, 2, 3, 4, 5, 6]  # max number of rounds for message passing
+        gammas = [1, 3, 5, 6]  # max number of rounds for message passing
         ps = [1.0]
         main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
