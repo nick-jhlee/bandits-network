@@ -5,18 +5,24 @@ import os
 
 
 class Problem:
-    def __init__(self, Agents, Network, T, N, mp="HMP", n_gossip=1, discard=False):
+    def __init__(self, Network, Agents, T, N, K, param):
+        # param: (discard, n_gossip, mp, gamma, p, n_repeat)
+        _, _, mp, gamma, _, _ = param
+
         self.Agents = Agents
         self.Network = Network
 
-        self.T, self.N = T, N
+        self.T, self.N, self.K = T, N, K
 
-        self.mp = mp
-        self.discard = discard
-        self.n_gossip = n_gossip
+        self.discard = param[0]
+        self.n_gossip = param[1]
+        self.mp = param[2]
+        self.gamma = param[3]
+        self.p = param[4]
+        self.n_repeat = param[5]
 
     def __str__(self):
-        return f"{self.mp}, discard={self.discard}, n_gossip={self.n_gossip}"
+        return f"discard={self.discard}, n_gossip={self.n_gossip}, {self.mp}"
 
 
 class Message:
@@ -100,7 +106,7 @@ class Agent:
         # message to be sent to his neighbors
         return Message(arm, reward, self.idx, self.gamma)
 
-    def update_message(self, message):
+    def store_message(self, message):
         message.decay()
         self.messages.append(message)
 
@@ -119,14 +125,15 @@ class Agent:
                         if self.mp == "MP" or (self.mp == "Greedy-MP" and contain_message):
                             if contain_message:
                                 self.receive_message(message)
-                            self.update_message(message)
-                        elif self.mp == "HMP":
+                            self.store_message(message)
+                        elif self.mp == "Hitting-MP":
                             if contain_message:
                                 self.receive_message(message)
+                                del message
                             else:
-                                self.update_message(message)
-                        # else:
-                        #     raise NotImplementedError(f"{self.mp}, {contain_message} protocol not yet implemented!")
+                                self.store_message(message)
+                        else:
+                            del message
 
 
 def run_ucb(problem, p):
@@ -178,22 +185,23 @@ def run_ucb(problem, p):
     Group_Regrets = np.sum(np.array(Regrets), axis=0)
     Group_Communications = np.sum(np.array(Communications), axis=0)
 
-    path = f"heterogeneous/{mp}_n_gossip={n_gossip}_discard={discard}"
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    # plot regrets
-    titles = [f"{mp}: {wise} Regrets ({Network.name}, p={p}, gamma={Agents[0].gamma}, n_gossip={n_gossip}, " \
-              f"Discard={discard})" for wise in ["Agent-specific", "Group"]]
-    fnames = [f"{path}/Regret_{wise}_{mp}_p={p}_gamma={Agents[0].gamma}_{Network.name}.pdf" for wise in
-              ["agent", "group"]]
-    plot(Regrets, Group_Regrets, Network, titles, fnames)
-
-    # plot communications
-    titles = [f"{mp}: {wise} Communications ({Network.name}, p={p}, gamma={Agents[0].gamma}, n_gossip={n_gossip}, " \
-              f"Discard={discard})" for wise in ["Agent-specific", "Group"]]
-    fnames = [f"{path}/Communication_{wise}_{mp}_p={p}_gamma={Agents[0].gamma}_{Network.name}.pdf" for wise in
-              ["agent", "group"]]
-    plot(Communications, Group_Communications, Network, titles, fnames)
+    # # plotting quantities vs. iteration
+    # path = f"heterogeneous/{mp}_n_gossip={n_gossip}_discard={discard}"
+    # if not os.path.exists(path):
+    #     os.makedirs(path)
+    #
+    # # plot regrets
+    # titles = [f"{mp}: {wise} Regrets ({Network.name}, p={p}, gamma={Agents[0].gamma}, n_gossip={n_gossip}, " \
+    #           f"Discard={discard})" for wise in ["Agent-specific", "Group"]]
+    # fnames = [f"{path}/Regret_{wise}_{mp}_p={p}_gamma={Agents[0].gamma}_{Network.name}.pdf" for wise in
+    #           ["agent", "group"]]
+    # plot(Regrets, Group_Regrets, Network, titles, fnames)
+    #
+    # # plot communications
+    # titles = [f"{mp}: {wise} Communications ({Network.name}, p={p}, gamma={Agents[0].gamma}, n_gossip={n_gossip}, " \
+    #           f"Discard={discard})" for wise in ["Agent-specific", "Group"]]
+    # fnames = [f"{path}/Communication_{wise}_{mp}_p={p}_gamma={Agents[0].gamma}_{Network.name}.pdf" for wise in
+    #           ["agent", "group"]]
+    # plot(Communications, Group_Communications, Network, titles, fnames)
 
     return Group_Regrets[-1], Group_Communications[-1]
