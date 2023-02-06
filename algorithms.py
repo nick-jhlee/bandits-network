@@ -17,7 +17,7 @@ class Problem:
         self.n_gossip = param[1]
         self.mp = param[2]
         self.gamma = param[3]
-        self.p = param[4]
+        self.p = param[4]  # *not* link failure (i.e. communication) probability
         self.n_repeat = param[5]
 
     def __str__(self):
@@ -44,7 +44,7 @@ class Agent:
         self.Network = Network
         self.idx = idx
         self.arm_set = arm_set
-        self.optimal = max([reward_avgs[arm] for arm in arm_set])
+        self.optimal = max([reward_avgs[arm] for arm in arm_set])  # local optimal
         self.messages = []
         self.gamma = gamma
         self.mp = mp
@@ -107,7 +107,10 @@ class Agent:
 
     def store_message(self, message):
         message.decay()
-        self.messages.append(message)
+        if message.gamma < 0:   # if the message is not yet expired
+            del message
+        else:
+            self.messages.append(message)
 
     def receive_message(self, message):
         arm, reward = message.arm, message.reward
@@ -118,21 +121,22 @@ class Agent:
         for message in messages:
             if message is not None:
                 contain_message = message.arm in self.arm_set
-                if message.gamma > 0:  # if the message is not yet expired
-                    message.origin = origin  # update origin
-                    if np.random.binomial(1, p_v) == 1:  # if discarding does not take place
-                        if self.mp == "MP" or (self.mp == "Greedy-MP" and contain_message):
-                            if contain_message:
-                                self.receive_message(message)
-                            self.store_message(message)
-                        elif self.mp == "Hitting-MP":
-                            if contain_message:
-                                self.receive_message(message)
-                                del message
-                            else:
-                                self.store_message(message)
-                        else:
+                message.origin = origin  # update origin
+                if np.random.binomial(1, p_v) == 1:  # if discarding does not take place
+                    if self.mp == "MP" or (self.mp == "Greedy-MP" and contain_message):
+                        if contain_message:
+                            self.receive_message(message)
+                        self.store_message(message)
+                    elif self.mp == "Hitting-MP":
+                        if contain_message:
+                            self.receive_message(message)
                             del message
+                        else:
+                            self.store_message(message)
+                    else:
+                        del message
+                else:
+                    del message
 
 
 def run_ucb(problem, p):
@@ -150,7 +154,8 @@ def run_ucb(problem, p):
 
     min_deg = min((d for _, d in Network.degree()))
     # run UCB
-    for t in tqdm(range(T)):
+    for t in range(T):
+        # for t in tqdm(range(T)):
         # single iteration of UCB
         for i in range(N):
             messages = Agents[i].UCB_network()
@@ -178,6 +183,10 @@ def run_ucb(problem, p):
                             else:
                                 Agents[neighbor].receive([message_copy], Agents[i])
 
+                        # delete the original message
+                        del message
+                else:
+                    del message
         # collect regrets and communications
         for i in range(N):
             Regrets[i][t], Communications[i][t] = Agents[i].regret, Agents[i].communication

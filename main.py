@@ -1,4 +1,5 @@
 from algorithms import *
+import multiprocess
 from multiprocess import Pool
 import networkx as nx
 
@@ -35,16 +36,17 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
     params = list(product(discards, n_gossips, mps, gammas, ps, range(n_repeats)))
 
     def F(param):
-        # # print process id
-        # print(f"{multiprocess.process.current_process()}, {param}")
-
         # reseeding!
         np.random.seed(int.from_bytes(os.urandom(4), byteorder='little'))
 
         # create problem instance
         problem = create_problem(Network, Agents, T, N, K, param)
+        result = run_ucb(problem, param[-2])
 
-        return run_ucb(problem, param[-2])
+        # print process id
+        print(f"Finished: {multiprocess.process.current_process()}, {param}")
+
+        return result
 
     # run the experiments in parallel
     with Pool() as pool:
@@ -129,7 +131,7 @@ if __name__ == '__main__':
     discards, n_gossips, mps = [False], [None], ["MP", "Greedy-MP", "Hitting-MP"]
 
     # create communication network
-    for er_p in [0.8, 0.1, 0.4]:
+    for er_p in [0.1, 0.4, 0.8]:
         if RG_model == "ER":
             Network = nx.erdos_renyi_graph(N, er_p, seed=2023)
             # connect the graph, if it's disconnected
@@ -178,13 +180,12 @@ if __name__ == '__main__':
             f.savefig(f"heterogeneous/networks/{RG_model}_{er_p}_{arm}.pdf", bbox_inches='tight')
             # plt.show()
 
-        # Experiment #1. Effect of varying p
+        # # Experiment #1. Effect of varying p
         # ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]  # probability that a message is *not* discarded!
-        ps = [0.1, 0.5, 0.9, 1.0]  # probability that a message is *not* discarded!
-        gammas = [3]  # number of rounds for message passing
-        main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
+        # gammas = [3]  # number of rounds for message passing
+        # main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
 
         # Experiment #2. Effect of gamma, under perfect communication
-        gammas = [1, 3, 5, 6]  # max number of rounds for message passing
+        gammas = [1, 2, 3, 4, 5, 6]  # max number of rounds for message passing
         ps = [1.0]
         main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
