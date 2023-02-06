@@ -160,10 +160,17 @@ def run_ucb(problem, p):
         for i in range(N):
             messages = Agents[i].UCB_network()
             neighbors = Network.adj[i]
+            # sanity check: set of messages cannot be empty
+            if len(messages) == 0:
+                raise ValueError(f"messages={messages} empty?")
             for message in messages:
                 # construct gossiping neighborhood
                 effective_nbhd = [nhb for nhb in neighbors if nhb != message.origin]
-                if len(effective_nbhd) > 0:  # as long as the current message did not hit a dead end
+                if len(effective_nbhd) == 0:    # the current message hit a dead end
+                    del message
+                    continue
+                else:
+                    # construct neighbors to which the message will be gossiped to
                     if n_gossip is None or n_gossip >= len(effective_nbhd):
                         gossip_neighbors = effective_nbhd
                     else:
@@ -183,9 +190,7 @@ def run_ucb(problem, p):
                             else:
                                 Agents[neighbor].receive([message_copy], Agents[i])
 
-                        # delete the original message
-                        del message
-                else:
+                    # delete the original message, after finish gossiping
                     del message
         # collect regrets and communications
         for i in range(N):

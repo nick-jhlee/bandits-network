@@ -122,7 +122,7 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
 
 
 if __name__ == '__main__':
-    T = int(1e3)  # number of iterations for each run of bandit
+    T = int(1e2)  # number of iterations for each run of bandit
     N, K = 20, 40  # number of agents, total number of arms
     RG_model = 'ER'
 
@@ -186,6 +186,6 @@ if __name__ == '__main__':
         # main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
 
         # Experiment #2. Effect of gamma, under perfect communication
-        gammas = [1, 2, 3, 4, 5, 6]  # max number of rounds for message passing
+        gammas = [1, 2, 3, 4, 5]  # max number of rounds for message passing
         ps = [1.0]
         main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
