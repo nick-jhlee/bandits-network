@@ -103,7 +103,7 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
     elif exp_type == "vary_gamma":
         title_regret = f"Final Regret ({Network.name}, p={p})"
         fname_regret = f"heterogeneous/Regret_final_gamma_p={p}_{Network.name}"
-        title_communication = f"Final Regret ({Network.name}, p={p})"
+        title_communication = f"Final Communication ({Network.name}, p={p})"
         fname_communication = f"heterogeneous/Communication_final_gamma_p={p}_{Network.name}"
     else:
         raise ValueError("Are we fixing p or gamma?")
@@ -122,16 +122,12 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
 
 
 if __name__ == '__main__':
-    T = int(1e2)  # number of iterations for each run of bandit
+    T = int(1e3)  # number of iterations for each run of bandit
     N, K = 20, 40  # number of agents, total number of arms
     RG_model = 'ER'
 
-    # compared baseline models
-    # discards, n_gossips, mps = [False, True], [1, 3, None], ["MP", "Greedy-MP", "Hitting-MP"]
-    discards, n_gossips, mps = [False], [None], ["MP", "Greedy-MP", "Hitting-MP"]
-
     # create communication network
-    for er_p in [0.1, 0.4, 0.8]:
+    for er_p in [0.4, 0.1, 0.8]:
         if RG_model == "ER":
             Network = nx.erdos_renyi_graph(N, er_p, seed=2023)
             # connect the graph, if it's disconnected
@@ -180,12 +176,17 @@ if __name__ == '__main__':
             f.savefig(f"heterogeneous/networks/{RG_model}_{er_p}_{arm}.pdf", bbox_inches='tight')
             # plt.show()
 
-        # # Experiment #1. Effect of varying p
-        # ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]  # probability that a message is *not* discarded!
-        # gammas = [3]  # number of rounds for message passing
-        # main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
+        # compared baseline models
+        # discards, n_gossips, mps = [False, True], [1, 3, None], ["MP", "Greedy-MP", "Hitting-MP"]
+        discards, n_gossips, mps = [False], [1, None], ["MP", "Greedy-MP", "Hitting-MP"]
+
+        # Experiment #1. Effect of varying p
+        ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0]  # probability that a message is *not* discarded!
+        gammas = [3]  # number of rounds for message passing
+        main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
 
         # Experiment #2. Effect of gamma, under perfect communication
         gammas = [1, 2, 3, 4, 5]  # max number of rounds for message passing
         ps = [1.0]
         main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
+

@@ -1,4 +1,6 @@
 from utils import *
+from collections import deque
+
 from tqdm import tqdm
 from copy import copy
 
@@ -45,7 +47,7 @@ class Agent:
         self.idx = idx
         self.arm_set = arm_set
         self.optimal = max([reward_avgs[arm] for arm in arm_set])  # local optimal
-        self.messages = []
+        self.messages = deque()
         self.gamma = gamma
         self.mp = mp
 
@@ -80,10 +82,11 @@ class Agent:
                     tmp = ucb
         # finalize the set of messages to be passed along
         cur_message = self.pull(final_arm)
-        final_messages = self.messages + [cur_message]
+        self.messages.append(cur_message)
 
         # empty his current set of messages
-        self.messages = []
+        final_messages = self.messages
+        self.messages = deque()
         return final_messages
 
     def pull(self, arm):
@@ -107,7 +110,7 @@ class Agent:
 
     def store_message(self, message):
         message.decay()
-        if message.gamma < 0:   # if the message is not yet expired
+        if message.gamma < 0:  # if the message is not yet expired
             del message
         else:
             self.messages.append(message)
@@ -118,7 +121,8 @@ class Agent:
         self.total_rewards[arm] += reward
 
     def receive(self, messages, origin, p_v=1):
-        for message in messages:
+        while messages:  # if d is True if d is not empty (canonical way for all collections)
+            message = messages.pop()
             if message is not None:
                 contain_message = message.arm in self.arm_set
                 message.origin = origin  # update origin
@@ -160,13 +164,11 @@ def run_ucb(problem, p):
         for i in range(N):
             messages = Agents[i].UCB_network()
             neighbors = Network.adj[i]
-            # sanity check: set of messages cannot be empty
-            if len(messages) == 0:
-                raise ValueError(f"messages={messages} empty?")
-            for message in messages:
+            while messages:
+                message = messages.pop()
                 # construct gossiping neighborhood
                 effective_nbhd = [nhb for nhb in neighbors if nhb != message.origin]
-                if len(effective_nbhd) == 0:    # the current message hit a dead end
+                if len(effective_nbhd) == 0:  # the current message hit a dead end
                     del message
                     continue
                 else:
@@ -183,12 +185,12 @@ def run_ucb(problem, p):
                         Agents[i].communication += 1
                         # send messages
                         if np.random.binomial(1, p) == 0:  # link failure
-                            Agents[neighbor].receive([None], Agents[i])
+                            Agents[neighbor].receive(deque([None]), Agents[i])
                         else:
                             if discard:
-                                Agents[neighbor].receive([message_copy], Agents[i], min_deg / Network.degree[neighbor])
+                                Agents[neighbor].receive(deque(message_copy), Agents[i], min_deg / Network.degree[neighbor])
                             else:
-                                Agents[neighbor].receive([message_copy], Agents[i])
+                                Agents[neighbor].receive(deque([message_copy]), Agents[i])
 
                     # delete the original message, after finish gossiping
                     del message
