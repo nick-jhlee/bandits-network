@@ -21,7 +21,7 @@ def create_problem(Network, Agents, T, N, K, param):
     return Problem(Network, Agents, T, N, K, param)
 
 
-def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, n_repeats):
+def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, n_repeats, path):
     final_regrets_mean, final_regrets_std = [], []
     final_communications_mean, final_communications_std = [], []
 
@@ -97,14 +97,16 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
 
     if exp_type == "vary_p":
         title_regret = f"Final Regret ({Network.name}, gamma={gamma})"
-        fname_regret = f"heterogeneous/Regret_final_p_gamma={gamma}_{Network.name}"
+        fname_regret = f"{path}/Regret_final_p_gamma={gamma}_{Network.name}"
+
         title_communication = f"Final Communication ({Network.name}, gamma={gamma})"
-        fname_communication = f"heterogeneous/Communication_final_p_gamma={gamma}_{Network.name}"
+        fname_communication = f"heterogeneous_K={K}/Communication_final_p_gamma={gamma}_{Network.name}"
     elif exp_type == "vary_gamma":
         title_regret = f"Final Regret ({Network.name}, p={p})"
-        fname_regret = f"heterogeneous/Regret_final_gamma_p={p}_{Network.name}"
+        fname_regret = f"{path}/Regret_final_gamma_p={p}_{Network.name}"
+
         title_communication = f"Final Communication ({Network.name}, p={p})"
-        fname_communication = f"heterogeneous/Communication_final_gamma_p={p}_{Network.name}"
+        fname_communication = f"{path}/Communication_final_gamma_p={p}_{Network.name}"
     else:
         raise ValueError("Are we fixing p or gamma?")
 
@@ -125,9 +127,18 @@ if __name__ == '__main__':
     T = int(1e3)  # number of iterations for each run of bandit
     N, K = 20, 40  # number of agents, total number of arms
     RG_model = 'ER'
+    q = 1
+
+    path = f"heterogeneous_K={K}_q={q}"
+
+    # create path
+    if not os.path.exists(path):
+        os.makedirs(path)
+    if not os.path.exists(f"{path}/networks"):
+        os.makedirs(f"{path}/networks")
 
     # create communication network
-    for er_p in [0.4, 0.1, 0.8]:
+    for er_p in [0.1, 0.8]:
         if RG_model == "ER":
             Network = nx.erdos_renyi_graph(N, er_p, seed=2023)
             # connect the graph, if it's disconnected
@@ -140,26 +151,27 @@ if __name__ == '__main__':
             raise NotImplementedError(f"{RG_model} not yet implemented")
         Network.name = f"{RG_model}_{er_p}"
 
-        # plot total network
-        f = plt.figure(100 * er_p)
-        nx.draw_networkx(Network, with_labels=True)
-        f.savefig(f"heterogeneous/networks/{RG_model}_{er_p}.pdf", bbox_inches='tight')
-        # plt.show()
+        if not os.path.exists(f"{path}/networks/{RG_model}_{er_p}.pdf"):
+            # plot total network
+            f = plt.figure(100 * er_p)
+            nx.draw_networkx(Network, with_labels=True)
+            f.savefig(f"{path}/networks/{RG_model}_{er_p}.pdf", bbox_inches='tight')
+            # plt.show()
 
         # arm set and their mean rewards
-        total_arm_set = list(range(K))
         tmp = np.linspace(0.1, 1.0, num=K)
-        reward_avgs = {total_arm_set[i]: tmp[i] for i in range(K)}
+        reward_avgs = {k: tmp[k] for k in range(K)}
+        total_arm_set = list(range(K))
 
         # create agents by distributing arms
         Agents = []
         for i in range(N):
             if i < K // 5:
                 arm_set_i = total_arm_set[5 * i:5 * (i + 1)]
-                Agents.append(Agent(i, arm_set_i, reward_avgs, Network, 0, 0))
+                Agents.append(Agent(i, arm_set_i, reward_avgs, Network, 0, 0, q, K))
             else:
                 arm_set_i = np.random.choice(total_arm_set, size=5, replace=False)
-                Agents.append(Agent(i, arm_set_i, reward_avgs, Network, 0, 0))
+                Agents.append(Agent(i, arm_set_i, reward_avgs, Network, 0, 0, q, K))
 
         # draw network for each arm
         for arm in range(K):
@@ -173,20 +185,21 @@ if __name__ == '__main__':
             # color the agents corresponding to the arm
             f = plt.figure(1000 * arm)
             nx.draw_networkx(Network, node_color=color_map, with_labels=True)
-            f.savefig(f"heterogeneous/networks/{RG_model}_{er_p}_{arm}.pdf", bbox_inches='tight')
+            f.savefig(f"{path}/networks/{RG_model}_{er_p}_{arm}.pdf", bbox_inches='tight')
             # plt.show()
 
         # compared baseline models
         # discards, n_gossips, mps = [False, True], [1, 3, None], ["MP", "Greedy-MP", "Hitting-MP"]
-        discards, n_gossips, mps = [False], [1, None], ["MP", "Greedy-MP", "Hitting-MP"]
+        discards, n_gossips, mps = [False], [1], ["MP", "Hitting-MP"]
 
-        # Experiment #1. Effect of varying p
-        ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0]  # probability that a message is *not* discarded!
-        gammas = [3]  # number of rounds for message passing
-        main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
+        # # Experiment #1. Effect of varying p
+        # # p: probability that a message is *not* discarded, per link
+        # ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0]
+        # gammas = [3]  # number of rounds for message passing
+        # main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
 
         # Experiment #2. Effect of gamma, under perfect communication
         gammas = [1, 2, 3, 4, 5]  # max number of rounds for message passing
-        ps = [1.0]
-        main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
+        ps = [0.9]
+        main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
 

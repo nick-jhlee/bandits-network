@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
+
 def plot(Regrets, Group_Regrets, Network, titles, fnames):
     # agent-wise quantity
     plt.figure(1)
