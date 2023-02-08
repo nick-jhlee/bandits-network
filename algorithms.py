@@ -1,6 +1,6 @@
 from utils import *
 from collections import deque
-from scipy.stats import cauchy, levy_stable
+from scipy.stats import cauchy, levy
 from math import inf
 
 from tqdm import tqdm
@@ -40,6 +40,25 @@ class Message:
     def decay(self):
         self.gamma -= 1
 
+    def corrupt(self):
+        # self.reward += levy.rvs()
+        # # Multiplicative corruption for rewards (2023.02.07)
+        # reward *= 0.5
+        # Heavy-tailed corruption for rewards (2023.02.07)
+        # reward += cauchy.rvs()
+        # if np.random.binomial(1, 0.5) == 1:
+        #     reward += levy.rvs()
+        # # Gaussian corruption for rewards (2023.02.07)
+        # if arm in [0, 1, 2, 3, 4]:
+        #     reward += 0.01
+        # # adversarial corruption (2023.02.08)
+        # if np.random.binomial(1, 0.5) == 1:
+        #     arm = self.worst
+        #     reward = 1
+        self.reward += np.random.normal(0.05, 0.01)
+        # # arm corruptions (2023.02.07)
+        # arm = self.corrupt_arm(arm)
+
 
 # class Arm:
 #     def __init__(self, arm_idx, reward):
@@ -59,7 +78,7 @@ class Agent:
         self.Network = Network
         self.idx = idx
         self.arm_set = arm_set
-        self.optimal = max([reward_avgs[arm] for arm in arm_set])  # local optimal
+        self.optimal = max([reward_avgs[arm] for arm in arm_set])  # local optimal reward
         self.messages = deque()
         self.gamma = gamma
         self.mp = mp
@@ -128,13 +147,10 @@ class Agent:
         # message to be sent to his neighbors
         return Message(arm, reward, self.idx, self.gamma)
 
-    def corrupt_arm(self, arm):
-        tmp = copy(self.total_arm_set)
-        tmp.remove(arm)
-        return np.random.choice(tmp)
-
     def store_message(self, message):
         message.decay()
+        if "corrupt" in self.mp:
+            message.corrupt()
         if message.gamma < 0:  # if the message is not yet expired, for MP
             del message
         else:
@@ -142,17 +158,6 @@ class Agent:
 
     def receive_message(self, message):
         arm, reward = message.arm, message.reward
-
-        if "corrupt" in self.mp:
-            # # Multiplicative corruption for rewards (2023.02.07)
-            # reward *= 0.5
-            # Heavy-tailed corruption for rewards (2023.02.07)
-            reward += cauchy.rvs()
-            # reward += levy_stable
-            # # Gaussian corruption for rewards (2023.02.07)
-            # reward += np.random.normal(0, self.q)
-            # # arm corruptions (2023.02.07)
-            # arm = self.corrupt_arm(arm)
 
         self.total_visitations[arm] += 1
         self.total_rewards[arm] += reward
@@ -165,15 +170,16 @@ class Agent:
                 message.origin = origin  # update origin
                 message.history.append(origin)  # update history
                 if np.random.binomial(1, p_v) == 1:  # if discarding does not take place
-                    if self.mp == "MP" or (self.mp == "Greedy-MP" and contain_message):
-                        if contain_message:
-                            self.receive_message(message)
-                        self.store_message(message)
-                    elif self.mp == "Hitting-MP":
-                        if contain_message:
-                            self.receive_message(message)
-                            del message
+                    if "MP" in self.mp:
+                        if "Hitting" in self.mp:
+                            if contain_message:
+                                self.receive_message(message)
+                                del message
+                            else:
+                                self.store_message(message)
                         else:
+                            if contain_message:
+                                self.receive_message(message)
                             self.store_message(message)
                     else:
                         del message

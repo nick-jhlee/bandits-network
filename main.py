@@ -124,82 +124,104 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
 
 
 if __name__ == '__main__':
-    T = int(1e3)  # number of iterations for each run of bandit
-    N, K = 20, 40  # number of agents, total number of arms
-    RG_model = 'ER'
-    q = 1
+    for K in [20, 10, 30]:  # total number of arms
+        print(f"K={K}")
+        T = int(1e3)  # number of iterations for each run of bandit
+        N = 20  # number of agents
+        RG_model = 'ER'
+        q = 0.01
 
-    path = f"heterogeneous_K={K}_q={q}"
+        path = f"heterogeneous_K={K}"
 
-    # create path
-    if not os.path.exists(path):
-        os.makedirs(path)
-    if not os.path.exists(f"{path}/networks"):
-        os.makedirs(f"{path}/networks")
+        # create path
+        if not os.path.exists(path):
+            os.makedirs(path)
+        if not os.path.exists(f"{path}/networks"):
+            os.makedirs(f"{path}/networks")
 
-    # create communication network
-    for er_p in [0.1, 0.8]:
-        if RG_model == "ER":
-            Network = nx.erdos_renyi_graph(N, er_p, seed=2023)
-            # connect the graph, if it's disconnected
-            if not nx.is_connected(Network):
-                augment_edges = nx.k_edge_augmentation(Network, 1)
-                Network.add_edges_from(augment_edges)
-        elif RG_model == "BA":
-            Network = nx.barabasi_albert_graph(N, 5, seed=2023)
-        else:
-            raise NotImplementedError(f"{RG_model} not yet implemented")
-        Network.name = f"{RG_model}_{er_p}"
-
-        if not os.path.exists(f"{path}/networks/{RG_model}_{er_p}.pdf"):
-            # plot total network
-            f = plt.figure(100 * er_p)
-            nx.draw_networkx(Network, with_labels=True)
-            f.savefig(f"{path}/networks/{RG_model}_{er_p}.pdf", bbox_inches='tight')
-            # plt.show()
-
-        # arm set and their mean rewards
-        tmp = np.linspace(0.1, 1.0, num=K)
-        reward_avgs = {k: tmp[k] for k in range(K)}
-        total_arm_set = list(range(K))
-
-        # create agents by distributing arms
-        Agents = []
-        for i in range(N):
-            if i < K // 5:
-                arm_set_i = total_arm_set[5 * i:5 * (i + 1)]
-                Agents.append(Agent(i, arm_set_i, reward_avgs, Network, 0, 0, q, K))
+        # create communication network
+        for er_p in [0.1, 0.2]:
+            if RG_model == "ER":
+                Network = nx.erdos_renyi_graph(N, er_p, seed=2023)
+                # connect the graph, if it's disconnected
+                if not nx.is_connected(Network):
+                    augment_edges = nx.k_edge_augmentation(Network, 1)
+                    Network.add_edges_from(augment_edges)
+            elif RG_model == "BA":
+                Network = nx.barabasi_albert_graph(N, 5, seed=2023)
+            elif RG_model == "SBM":  # 4 blocks
+                partition_size = N // 4
+                Network = nx.random_partition_graph([partition_size for _ in range(4)], 0.8, 0.2)
             else:
-                arm_set_i = np.random.choice(total_arm_set, size=5, replace=False)
-                Agents.append(Agent(i, arm_set_i, reward_avgs, Network, 0, 0, q, K))
+                raise NotImplementedError(f"{RG_model} not yet implemented")
+            Network.name = f"{RG_model}_{er_p}"
 
-        # draw network for each arm
-        for arm in range(K):
-            color_map = []
-            for i in range(N):
-                if arm in Agents[i].arm_set:
-                    color_map.append('red')
-                else:
-                    color_map.append('blue')
+            # # plant a clique with the global optimal arm K-1
+            # cliques = list(nx.find_cliques(Network))
+            # clique_sizes = [len(clique) for clique in cliques]
+            # max_clique = cliques[np.argmax(clique_sizes)]
+            max_clique = []
 
-            # color the agents corresponding to the arm
-            f = plt.figure(1000 * arm)
-            nx.draw_networkx(Network, node_color=color_map, with_labels=True)
-            f.savefig(f"{path}/networks/{RG_model}_{er_p}_{arm}.pdf", bbox_inches='tight')
-            # plt.show()
+            if not os.path.exists(f"{path}/networks/{RG_model}_{er_p}.pdf"):
+                # plot total network
+                f = plt.figure(100 * er_p)
+                nx.draw_networkx(Network, with_labels=True)
+                f.savefig(f"{path}/networks/{RG_model}_{er_p}.pdf", bbox_inches='tight')
+                # plt.show()
 
-        # compared baseline models
-        # discards, n_gossips, mps = [False, True], [1, 3, None], ["MP", "Greedy-MP", "Hitting-MP"]
-        discards, n_gossips, mps = [False], [1], ["MP", "Hitting-MP"]
+            # arm set and their mean rewards
+            tmp = np.linspace(0.1, 1.0, num=K)
+            # tmp = [0.5 * int(k == K-1) + 0.5 for k in range(K)]
+            reward_avgs = {k: tmp[k] for k in range(K)}
+            total_arm_set = list(range(K))
 
-        # # Experiment #1. Effect of varying p
-        # # p: probability that a message is *not* discarded, per link
-        # ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0]
-        # gammas = [3]  # number of rounds for message passing
-        # main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
+            # create agents by distributing arms
+            Agents = []
+            if RG_model != "SBM":
+                for i in range(N):
+                    if i < K // 5:
+                        arm_set_i = total_arm_set[5 * i:5 * (i + 1)]
+                    else:
+                        arm_set_i = list(np.random.choice(total_arm_set, size=5, replace=False))
+                    if i in max_clique and K-1 not in arm_set_i:
+                        arm_set_i.append(K - 1)
+                    Agents.append(Agent(i, arm_set_i, reward_avgs, Network, 0, 0, q, K))
+            else:
+                for i, partition in enumerate(Network.graph['partition']):
+                    for v in partition:
+                        arm_set_v = [total_arm_set[K - 1 - i]] + list(
+                            np.random.choice(total_arm_set[:K - 1 - i], size=5, replace=False))
+                        Agents.append(Agent(v, arm_set_v, reward_avgs, Network, 0, 0, q, K))
 
-        # Experiment #2. Effect of gamma, under perfect communication
-        gammas = [1, 2, 3, 4, 5]  # max number of rounds for message passing
-        ps = [0.9]
-        main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
+            # draw network for each arm
+            pos = nx.spring_layout(Network)
+            for arm in range(K):
+                color_map = []
+                for i in range(N):
+                    if arm in Agents[i].arm_set:
+                        color_map.append('red')
+                    else:
+                        color_map.append('blue')
 
+                # color the agents corresponding to the arm
+                f = plt.figure(1000 * arm)
+                nx.draw_networkx(Network, node_color=color_map, pos=pos, with_labels=True)
+                f.savefig(f"{path}/networks/{RG_model}_{er_p}_{arm}.pdf", bbox_inches='tight')
+                # plt.show()
+
+            # compared baseline models
+            # discards, n_gossips, mps = [False, True], [1, 3, None], ["MP", "Greedy-MP", "Hitting-MP"]
+            discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP", "corrupt-MP", "corrupt-Hitting-MP"]
+
+            # # Experiment #1. Effect of varying p
+            # # p: probability that a message is *not* discarded, per link
+            # ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0]
+            # gammas = [3]  # number of rounds for message passing
+            # main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
+
+            # Experiment #2. Effect of gamma, under perfect communication
+            gammas = [1, 2, 3, 4, 5]  # max number of rounds for message passing
+            ps = [1.0]
+            main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
+
+            plt.clf()
