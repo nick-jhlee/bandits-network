@@ -62,7 +62,7 @@ class Agent:
     reward_avgs: dict of reward to its mean
     """
 
-    def __init__(self, idx, arm_set, reward_avgs, Network, gamma, mp, q, K):
+    def __init__(self, idx, arm_set, reward_avgs, Network, gamma, mp, K):
         self.Network = Network
         self.idx = idx
         self.arm_set = arm_set
@@ -70,7 +70,6 @@ class Agent:
         self.messages = deque()
         self.gamma = gamma
         self.mp = mp
-        self.q = q
 
         # not available to the agents; this is for implementeing the arm corruption by the environment
         self.total_arm_set = deque(range(K))
@@ -102,7 +101,7 @@ class Agent:
             for arm in self.arm_set:
                 m = self.total_visitations[arm]
                 reward_estimate = self.total_rewards[arm] / m
-                bonus = np.sqrt(2 * np.log(self.t) / m)
+                bonus = np.sqrt(3 * np.log(self.t) / m)
                 ucb = reward_estimate + bonus
                 if tmp < ucb:
                     final_arm = arm
@@ -127,7 +126,8 @@ class Agent:
         self.total_visitations[arm] += 1
 
         # receive/update reward
-        reward = np.random.binomial(1, self.reward_avgs[arm])
+        # reward = np.random.binomial(1, self.reward_avgs[arm]) # Berounlli reward
+        reward = np.random.normal(self.reward_avgs[arm], 1)
         self.total_rewards[arm] += reward
 
         # update regret
@@ -218,7 +218,7 @@ def run_ucb(problem, p):
         for v in range(N):
             messages = total_messages[v]
 
-            if "bandwidth" in mp and len(messages) >= 15:
+            if mp == "baseline" or ("bandwidth" in mp and len(messages) >= 200):
                 del messages
             else:
                 neighbors = Network.adj[v]
@@ -235,7 +235,7 @@ def run_ucb(problem, p):
                         message_copy = deepcopy(message)
                         # update communication complexity
                         Agents[v].communication += 1
-                        # update number of messages
+                        # update number of messages per edge
                         if v < neighbor:
                             Edge_Messages[original_edges.index((v, neighbor))][t] += 1
                         else:
@@ -254,6 +254,7 @@ def run_ucb(problem, p):
             Communications[v][t] = Agents[v].communication
 
     # group regrets and communications
+    # Group_Regrets = np.max(np.array(Regrets), axis=0)
     Group_Regrets = np.sum(np.array(Regrets), axis=0)
     Group_Communications = np.sum(np.array(Communications), axis=0)
 
@@ -293,7 +294,7 @@ def run_ucb(problem, p):
     #     plt.savefig(f"heterogeneous_K={problem.K}/Messages_{problem.mp}.pdf", dpi=1200, bbox_inches='tight')
     #     # plt.show()
 
-    return Group_Regrets[-1], Group_Communications[-1]
+    return Group_Regrets, Group_Communications
 
 
 def interfere(messages):
