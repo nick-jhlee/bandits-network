@@ -47,8 +47,8 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
         print(f"Finished: {multiprocess.process.current_process()}, {param}")
 
         return result
-    # print(F(params[0]))
-    # raise ValueError("stop")
+    print(F(params[0]))
+    raise ValueError("stop")
 
     # run the experiments in parallel
     with Pool() as pool:
@@ -128,8 +128,8 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
 if __name__ == '__main__':
     for K in [40]:  # total number of arms
         print(f"K={K}")
-        T = int(1e3)  # number of iterations for each run of bandit
-        N = 20  # number of agents
+        T = int(5e2)  # number of iterations
+        N = 10  # number of agents
         RG_model = 'ER'
         q = 0.01
 
@@ -151,9 +151,9 @@ if __name__ == '__main__':
                     Network.add_edges_from(augment_edges)
             elif RG_model == "BA":
                 Network = nx.barabasi_albert_graph(N, 5, seed=2023)
-            elif RG_model == "SBM":  # 4 blocks
-                partition_size = N // 4
-                Network = nx.random_partition_graph([partition_size for _ in range(4)], 0.8, 0.2)
+            elif RG_model == "SBM":  # binary SBM
+                partition_size = N // 2
+                Network = nx.random_partition_graph([partition_size for _ in range(2)], 0.8, 0.1, seed=2023)
             else:
                 raise NotImplementedError(f"{RG_model} not yet implemented")
             Network.name = f"{RG_model}_{er_p}"
@@ -184,18 +184,19 @@ if __name__ == '__main__':
             Agents = []
             if RG_model != "SBM":
                 for i in range(N):
-                    arm_set_i = arm_sets[i % num_arm_sets]
-                    # if i < K // 5:
-                    #     arm_set_i = total_arm_set[5 * i:5 * (i + 1)]
-                    # else:
-                    #     arm_set_i = list(np.random.choice(total_arm_set, size=5, replace=False))
-                    # if i in max_clique and K - 1 not in arm_set_i:
-                    #     arm_set_i.append(K - 1)
+                    if i < K // 5:
+                        arm_set_i = total_arm_set[5 * i:5 * (i + 1)]
+                    else:
+                        arm_set_i = list(np.random.choice(total_arm_set, size=5, replace=False))
+                    if i in max_clique and K - 1 not in arm_set_i:
+                        arm_set_i.append(K - 1)
+                    # arm_set_i = arm_sets[i % num_arm_sets]
                     Agents.append(Agent(i, arm_set_i, reward_avgs, Network, 0, 0, q, K))
             else:
                 for i, partition in enumerate(Network.graph['partition']):
                     for v in partition:
-                        arm_set_v = [total_arm_set[K - 1 - i]] + list(
+                        # best local arm is the same for all agents!
+                        arm_set_v = [total_arm_set[K - 1]] + list(
                             np.random.choice(total_arm_set[:K - 1 - i], size=5, replace=False))
                         Agents.append(Agent(v, arm_set_v, reward_avgs, Network, 0, 0, q, K))
 
@@ -213,22 +214,23 @@ if __name__ == '__main__':
                 f = plt.figure(1000 * arm)
                 nx.draw_networkx(Network, node_color=color_map, pos=pos, with_labels=True)
                 f.savefig(f"{path}/networks/{RG_model}_{er_p}_{arm}.pdf", bbox_inches='tight')
+                plt.close()
                 # plt.show()
 
             # compared baseline models
             # discards, n_gossips, mps = [False, True], [1, 3, None], ["MP", "Greedy-MP", "Hitting-MP"]
             # discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP", "corrupt-MP", "corrupt-Hitting-MP"]
-            # discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP", "bandwidth-MP", "bandwidth-Hitting-MP"]
-            discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP"]
+            discards, n_gossips, mps = [False], [None], ["baseline", "MP", "Hitting-MP", "bandwidth-MP", "bandwidth-Hitting-MP"]
 
             # # Experiment #1. Effect of varying p
             # # p: probability that a message is *not* discarded, per link
-            # ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0]
-            # gammas = [3]  # number of rounds for message passing
-            # main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
+            # ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+            # gammas = [2]  # number of rounds for message passing
+            # main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
 
             # Experiment #2. Effect of gamma, under perfect communication
-            gammas = [1, 2, 3, 4]  # max number of rounds for message passing
+            # gammas = [1, 2, 3]  # max number of rounds for message passing
+            gammas = [3]  # max number of rounds for message passing
             ps = [1.0]
             main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
 

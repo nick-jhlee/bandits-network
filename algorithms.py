@@ -212,21 +212,16 @@ def run_ucb(problem, p):
         # single iteration of UCB, for each agent!
         for v in range(N):
             total_messages[v] = Agents[v].UCB_network()
+            Regrets[v][t] = Agents[v].regret
 
         # information sharing(dissemination)
         for v in range(N):
             messages = total_messages[v]
 
-            if "bandwidth" in mp and len(messages) >= 20:
+            if "bandwidth" in mp and len(messages) >= 15:
                 del messages
             else:
                 neighbors = Network.adj[v]
-                # update number of messages
-                for w in neighbors:
-                    if v < w:
-                        Edge_Messages[original_edges.index((v, w))][t] += len(messages)
-                    else:
-                        Edge_Messages[original_edges.index((w, v))][t] += len(messages)
                 # message broadcasting
                 while messages:
                     message = messages.pop()
@@ -240,6 +235,11 @@ def run_ucb(problem, p):
                         message_copy = deepcopy(message)
                         # update communication complexity
                         Agents[v].communication += 1
+                        # update number of messages
+                        if v < neighbor:
+                            Edge_Messages[original_edges.index((v, neighbor))][t] += 1
+                        else:
+                            Edge_Messages[original_edges.index((neighbor, v))][t] += 1
                         # send messages
                         if np.random.binomial(1, p) == 0:  # message failure
                             Agents[neighbor].receive(deque([None]), Agents[v])
@@ -251,9 +251,7 @@ def run_ucb(problem, p):
                     # delete the message sent by the originating agent, after communication is complete
                     del message
 
-        # collect regrets and communications
-        for v in range(N):
-            Regrets[v][t], Communications[v][t] = Agents[v].regret, Agents[v].communication
+            Communications[v][t] = Agents[v].communication
 
     # group regrets and communications
     Group_Regrets = np.sum(np.array(Regrets), axis=0)
@@ -278,7 +276,7 @@ def run_ucb(problem, p):
     #           ["agent", "group"]]
     # plot(Communications, Group_Communications, Network, titles, fnames)
 
-    # # plot number of messages passed around
+    # # plot number of messages passed around, for sparse edges only
     # fig, ax = plt.subplots()
     # clrs = sns.color_palette("husl", len(original_edges))
     # xs = range(T)
@@ -289,12 +287,11 @@ def run_ucb(problem, p):
     #         # ax.fill_between(xs, final_means[i] - final_stds[i], final_means[i] + final_stds[i],
     #         #                 alpha=0.3, facecolor=color)
     #
-    #     ax.set_title(f"[{problem.mp}] Number of messages per edge (gamma={problem.gamma}, discard={problem.discard}, n_gossip={problem.n_gossip})")
+    #     ax.set_title(f"[{problem.mp}] Number of messages per edge (gamma={problem.gamma}, p={problem.p}, discard={problem.discard}, n_gossip={problem.n_gossip})")
     #     ax.set_xlabel("t")
     #     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     #     plt.savefig(f"heterogeneous_K={problem.K}/Messages_{problem.mp}.pdf", dpi=1200, bbox_inches='tight')
     #     # plt.show()
-    # print(Edge_Messages)
 
     return Group_Regrets[-1], Group_Communications[-1]
 
