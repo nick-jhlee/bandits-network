@@ -4,7 +4,7 @@ from scipy.stats import cauchy, levy
 from math import inf
 
 from tqdm import tqdm
-from copy import copy
+from copy import deepcopy
 
 
 class Problem:
@@ -29,36 +29,23 @@ class Problem:
 
 
 class Message:
-    def __init__(self, arm, reward, origin, gamma):
+    def __init__(self, arm, reward, hash_value, gamma):
         self.arm = arm
         self.reward = reward
-        self.origin = origin
+        self.hash_value = hash_value
         self.gamma = gamma
-
-        self.history = deque([origin])
 
     def decay(self):
         self.gamma -= 1
 
-    def corrupt(self):
-        # self.reward += levy.rvs()
-        # # Multiplicative corruption for rewards (2023.02.07)
-        # reward *= 0.5
-        # Heavy-tailed corruption for rewards (2023.02.07)
-        # reward += cauchy.rvs()
-        # if np.random.binomial(1, 0.5) == 1:
-        #     reward += levy.rvs()
-        # # Gaussian corruption for rewards (2023.02.07)
-        # if arm in [0, 1, 2, 3, 4]:
-        #     reward += 0.01
-        # # adversarial corruption (2023.02.08)
-        # if np.random.binomial(1, 0.5) == 1:
-        #     arm = self.worst
-        #     reward = 1
-        self.reward += np.random.normal(0.05, 0.01)
-        # # arm corruptions (2023.02.07)
-        # arm = self.corrupt_arm(arm)
-
+    def corrupt(self, mp):
+        if np.random.binomial(1, 0.5) == 1:
+            if "gaussian" in mp:
+                self.reward += np.random.normal(0.1, 0.01)
+            elif "zero" in mp:
+                self.reward = 0
+            elif "heavy" in mp:
+                self.reward += levy.rvs()
 
 # class Arm:
 #     def __init__(self, arm_idx, reward):
@@ -102,6 +89,9 @@ class Agent:
         self.total_rewards = dict.fromkeys(arm_set, 0)
         self.total_visitations = dict.fromkeys(arm_set, 0)
 
+        # hash values of messages that he has seen
+        self.history = set()
+
     def UCB_network(self):
         # warm-up
         if self.t < len(self.arm_set):
@@ -118,6 +108,7 @@ class Agent:
                     tmp = ucb
         # finalize the set of messages to be passed along
         cur_message = self.pull(final_arm)
+        self.history.add(cur_message.hash_value)
         self.messages.append(cur_message)
 
         # empty his current set of messages
@@ -145,31 +136,35 @@ class Agent:
         self.t += 1
 
         # message to be sent to his neighbors
-        return Message(arm, reward, self.idx, self.gamma)
+        return Message(arm, reward, hash((arm, reward)), self.gamma)
 
     def store_message(self, message):
         message.decay()
         if "corrupt" in self.mp:
-            message.corrupt()
+            message.corrupt(self.mp)
         if message.gamma < 0:  # if the message is not yet expired, for MP
             del message
         else:
             self.messages.append(message)
 
     def receive_message(self, message):
-        arm, reward = message.arm, message.reward
+        # delete message if it has already been observed
+        if message.hash_value in self.history:
+            del message
+        else:
+            arm, reward = message.arm, message.reward
+            self.history.add(message.hash_value)
 
-        self.total_visitations[arm] += 1
-        self.total_rewards[arm] += reward
+            self.total_visitations[arm] += 1
+            self.total_rewards[arm] += reward
 
-    def receive(self, messages, origin, p_v=1):
+    def receive(self, messages, p_v=1):
         while messages:  # if d is True if d is not empty (canonical way for all collections)
             message = messages.pop()
             if message is not None:
                 contain_message = message.arm in self.arm_set
-                message.origin = origin  # update origin
-                message.history.append(origin)  # update history
                 if np.random.binomial(1, p_v) == 1:  # if discarding does not take place
+                    # receive, depending on the communication protocol!
                     if "MP" in self.mp:
                         if "Hitting" in self.mp:
                             if contain_message:
@@ -203,56 +198,44 @@ def run_ucb(problem, p):
     min_deg = min((d for _, d in Network.degree()))
     # run UCB
     # for t in tqdm(range(T)):
+    original_edges = Network.edges()
     for t in range(T):
+        # # fail edges randomly w.p. 1-p, i.i.d. -> for temporally changing graphs
+        # failed_edges = [edge for edge in original_edges if np.random.binomial(1, p) == 0]
+        # Network_modified = deepcopy(Network)
+        # Network_modified.remove_edges_from(failed_edges)
+
         # single iteration of UCB
         for i in range(N):
             messages = Agents[i].UCB_network()
             neighbors = Network.adj[i]
 
-            # communication probability for each link
-            if "bandwidth" in mp:
-                p_ = p ** len(messages)
-            else:
-                p_ = p
-
-            # link failure, which is assumed to be directed, i.e., even though i->j fails, j->i may not fail
-            neighbors_survived = [neighbor for neighbor in neighbors if np.random.binomial(1, p_) == 1]
+            if "bandwidth" in mp and len(messages) >= 5:
+                neighbors = []
 
             while messages:
                 message = messages.pop()
-                # construct gossiping neighborhood, for each message
-                # including link failures
-                effective_nbhd = [nhb for nhb in neighbors if nhb != message.origin]
-                # effective_nbhd = [nhb for nhb in neighbors if message.history.count(nhb) == 0]
-                if len(effective_nbhd) == 0:  # the current message hit a dead end
-                    del message
-                    continue
+                # construct neighbors to which the message will be gossiped to (push protocol!)
+                if n_gossip is None or n_gossip >= len(neighbors):
+                    gossip_neighbors = neighbors
                 else:
-                    # construct neighbors to which the message will be gossiped to
-                    if n_gossip is None or n_gossip >= len(effective_nbhd):
-                        gossip_neighbors = effective_nbhd
+                    gossip_neighbors = np.random.choice(neighbors, size=n_gossip, replace=False)
+                # pass messages
+                for neighbor in gossip_neighbors:
+                    message_copy = deepcopy(message)
+                    # update communication complexity
+                    Agents[i].communication += 1
+                    # send messages
+                    if np.random.binomial(1, p) == 0:  # message failure
+                        Agents[neighbor].receive(deque([None]), Agents[i])
                     else:
-                        gossip_neighbors = np.random.choice(effective_nbhd, size=n_gossip, replace=False)
-                    # link failures
-                    gossip_neighbors = [nhbd for nhbd in gossip_neighbors if nhbd in neighbors_survived]
-                    # pass messages
-                    for neighbor in gossip_neighbors:
-                        message_copy = copy(message)
-
-                        # update communication complexity
-                        Agents[i].communication += 1
-                        # send messages
-                        if np.random.binomial(1, p) == 0:  # link failure
-                            Agents[neighbor].receive(deque([None]), Agents[i])
+                        if discard:
+                            Agents[neighbor].receive(deque(message_copy), min_deg / Network.degree[neighbor])
                         else:
-                            if discard:
-                                Agents[neighbor].receive(deque(message_copy), Agents[i],
-                                                         min_deg / Network.degree[neighbor])
-                            else:
-                                Agents[neighbor].receive(deque([message_copy]), Agents[i])
+                            Agents[neighbor].receive(deque([message_copy]))
+                # delete the message sent by the originating agent, after communication is complete
+                del message
 
-                    # delete the message sent by the originating agent, after finish gossiping
-                    del message
         # collect regrets and communications
         for i in range(N):
             Regrets[i][t], Communications[i][t] = Agents[i].regret, Agents[i].communication
@@ -284,12 +267,11 @@ def run_ucb(problem, p):
 
 
 def interfere(messages):
-    tmp = copy(messages)
     # if len(tmp) > 5:
     #     self.messages = deque(np.random.choice(self.messages, 5))
     # return self.messages
-    messages_arms = deque(message.arm for message in tmp)
-    for message in tmp:
+    messages_arms = deque(message.arm for message in messages)
+    for message in messages:
         if messages_arms.count(message.arm) > 1:
             # messages.remove(message)
             return deque([None])

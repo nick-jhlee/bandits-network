@@ -124,7 +124,7 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
 
 
 if __name__ == '__main__':
-    for K in [20, 10, 30]:  # total number of arms
+    for K in [40]:  # total number of arms
         print(f"K={K}")
         T = int(1e3)  # number of iterations for each run of bandit
         N = 20  # number of agents
@@ -140,7 +140,7 @@ if __name__ == '__main__':
             os.makedirs(f"{path}/networks")
 
         # create communication network
-        for er_p in [0.1, 0.2]:
+        for er_p in [0.1]:
             if RG_model == "ER":
                 Network = nx.erdos_renyi_graph(N, er_p, seed=2023)
                 # connect the graph, if it's disconnected
@@ -174,17 +174,21 @@ if __name__ == '__main__':
             # tmp = [0.5 * int(k == K-1) + 0.5 for k in range(K)]
             reward_avgs = {k: tmp[k] for k in range(K)}
             total_arm_set = list(range(K))
+            # fixed list of arm sets
+            num_arm_sets = K // 5
+            arm_sets = [total_arm_set[5 * i:5 * (i + 1)] for i in range(num_arm_sets)]
 
             # create agents by distributing arms
             Agents = []
             if RG_model != "SBM":
                 for i in range(N):
-                    if i < K // 5:
-                        arm_set_i = total_arm_set[5 * i:5 * (i + 1)]
-                    else:
-                        arm_set_i = list(np.random.choice(total_arm_set, size=5, replace=False))
-                    if i in max_clique and K-1 not in arm_set_i:
-                        arm_set_i.append(K - 1)
+                    arm_set_i = arm_sets[i % num_arm_sets]
+                    # if i < K // 5:
+                    #     arm_set_i = total_arm_set[5 * i:5 * (i + 1)]
+                    # else:
+                    #     arm_set_i = list(np.random.choice(total_arm_set, size=5, replace=False))
+                    # if i in max_clique and K - 1 not in arm_set_i:
+                    #     arm_set_i.append(K - 1)
                     Agents.append(Agent(i, arm_set_i, reward_avgs, Network, 0, 0, q, K))
             else:
                 for i, partition in enumerate(Network.graph['partition']):
@@ -211,8 +215,9 @@ if __name__ == '__main__':
 
             # compared baseline models
             # discards, n_gossips, mps = [False, True], [1, 3, None], ["MP", "Greedy-MP", "Hitting-MP"]
-            discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP", "corrupt-MP", "corrupt-Hitting-MP"]
-
+            # discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP", "corrupt-MP", "corrupt-Hitting-MP"]
+            discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP", "bandwidth-MP", "bandwidth-Hitting-MP"]
+        
             # # Experiment #1. Effect of varying p
             # # p: probability that a message is *not* discarded, per link
             # ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0]
@@ -220,7 +225,8 @@ if __name__ == '__main__':
             # main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10)
 
             # Experiment #2. Effect of gamma, under perfect communication
-            gammas = [1, 2, 3, 4, 5]  # max number of rounds for message passing
+            gammas = [1, 2, 3, 4]  # max number of rounds for message passing
+            # gammas = [1, 2, 3, 4, 5]  # max number of rounds for message passing
             ps = [1.0]
             main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
 
