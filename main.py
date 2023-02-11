@@ -47,6 +47,8 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
         print(f"Finished: {multiprocess.process.current_process()}, {param}")
 
         return result
+    # print(F(params[0]))
+    # raise ValueError("stop")
 
     # run the experiments in parallel
     with Pool() as pool:
@@ -216,8 +218,9 @@ if __name__ == '__main__':
             # compared baseline models
             # discards, n_gossips, mps = [False, True], [1, 3, None], ["MP", "Greedy-MP", "Hitting-MP"]
             # discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP", "corrupt-MP", "corrupt-Hitting-MP"]
-            discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP", "bandwidth-MP", "bandwidth-Hitting-MP"]
-        
+            # discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP", "bandwidth-MP", "bandwidth-Hitting-MP"]
+            discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP"]
+
             # # Experiment #1. Effect of varying p
             # # p: probability that a message is *not* discarded, per link
             # ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0]
@@ -226,7 +229,6 @@ if __name__ == '__main__':
 
             # Experiment #2. Effect of gamma, under perfect communication
             gammas = [1, 2, 3, 4]  # max number of rounds for message passing
-            # gammas = [1, 2, 3, 4, 5]  # max number of rounds for message passing
             ps = [1.0]
             main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
 

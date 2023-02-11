@@ -10,19 +10,19 @@ from copy import deepcopy
 class Problem:
     def __init__(self, Network, Agents, T, N, K, param):
         # param: (discard, n_gossip, mp, gamma, p, n_repeat)
-        _, _, mp, gamma, _, _ = param
+        discard, n_gossip, mp, gamma, p, n_repeat = param
 
         self.Agents = Agents
         self.Network = Network
 
         self.T, self.N, self.K = T, N, K
 
-        self.discard = param[0]
-        self.n_gossip = param[1]
-        self.mp = param[2]
-        self.gamma = param[3]
-        self.p = param[4]  # *not* link failure (i.e. communication) probability
-        self.n_repeat = param[5]
+        self.discard = discard
+        self.n_gossip = n_gossip
+        self.mp = mp
+        self.gamma = gamma
+        self.p = p  # communication probability (1 - link failure)
+        self.n_repeat = n_repeat
 
     def __str__(self):
         return f"discard={self.discard}, n_gossip={self.n_gossip}, {self.mp}"
@@ -46,6 +46,7 @@ class Message:
                 self.reward = 0
             elif "heavy" in mp:
                 self.reward += levy.rvs()
+
 
 # class Arm:
 #     def __init__(self, arm_idx, reward):
@@ -190,55 +191,69 @@ def run_ucb(problem, p):
     T, N = problem.T, problem.N
     Agents, Network = problem.Agents, problem.Network
     discard, n_gossip, mp = problem.discard, problem.n_gossip, problem.mp
+    original_edges = list(Network.edges())
 
     # for logging
     Regrets = [[0 for _ in range(T)] for _ in range(N)]
     Communications = [[0 for _ in range(T)] for _ in range(N)]
+    Edge_Messages = [[0 for _ in range(T)] for _ in range(len(original_edges))]
 
     min_deg = min((d for _, d in Network.degree()))
+
     # run UCB
     # for t in tqdm(range(T)):
-    original_edges = Network.edges()
     for t in range(T):
         # # fail edges randomly w.p. 1-p, i.i.d. -> for temporally changing graphs
         # failed_edges = [edge for edge in original_edges if np.random.binomial(1, p) == 0]
         # Network_modified = deepcopy(Network)
         # Network_modified.remove_edges_from(failed_edges)
 
-        # single iteration of UCB
-        for i in range(N):
-            messages = Agents[i].UCB_network()
-            neighbors = Network.adj[i]
+        total_messages = [[None] for _ in range(N)]
+        # single iteration of UCB, for each agent!
+        for v in range(N):
+            total_messages[v] = Agents[v].UCB_network()
 
-            if "bandwidth" in mp and len(messages) >= 5:
-                neighbors = []
+        # information sharing(dissemination)
+        for v in range(N):
+            messages = total_messages[v]
 
-            while messages:
-                message = messages.pop()
-                # construct neighbors to which the message will be gossiped to (push protocol!)
-                if n_gossip is None or n_gossip >= len(neighbors):
-                    gossip_neighbors = neighbors
-                else:
-                    gossip_neighbors = np.random.choice(neighbors, size=n_gossip, replace=False)
-                # pass messages
-                for neighbor in gossip_neighbors:
-                    message_copy = deepcopy(message)
-                    # update communication complexity
-                    Agents[i].communication += 1
-                    # send messages
-                    if np.random.binomial(1, p) == 0:  # message failure
-                        Agents[neighbor].receive(deque([None]), Agents[i])
+            if "bandwidth" in mp and len(messages) >= 20:
+                del messages
+            else:
+                neighbors = Network.adj[v]
+                # update number of messages
+                for w in neighbors:
+                    if v < w:
+                        Edge_Messages[original_edges.index((v, w))][t] += len(messages)
                     else:
-                        if discard:
-                            Agents[neighbor].receive(deque(message_copy), min_deg / Network.degree[neighbor])
+                        Edge_Messages[original_edges.index((w, v))][t] += len(messages)
+                # message broadcasting
+                while messages:
+                    message = messages.pop()
+                    # construct neighbors to which the message will be gossiped to (push protocol!)
+                    if n_gossip is None or n_gossip >= len(neighbors):
+                        gossip_neighbors = neighbors
+                    else:
+                        gossip_neighbors = np.random.choice(neighbors, size=n_gossip, replace=False)
+                    # pass messages
+                    for neighbor in gossip_neighbors:
+                        message_copy = deepcopy(message)
+                        # update communication complexity
+                        Agents[v].communication += 1
+                        # send messages
+                        if np.random.binomial(1, p) == 0:  # message failure
+                            Agents[neighbor].receive(deque([None]), Agents[v])
                         else:
-                            Agents[neighbor].receive(deque([message_copy]))
-                # delete the message sent by the originating agent, after communication is complete
-                del message
+                            if discard:
+                                Agents[neighbor].receive(deque([message_copy]), min_deg / Network.degree[neighbor])
+                            else:
+                                Agents[neighbor].receive(deque([message_copy]))
+                    # delete the message sent by the originating agent, after communication is complete
+                    del message
 
         # collect regrets and communications
-        for i in range(N):
-            Regrets[i][t], Communications[i][t] = Agents[i].regret, Agents[i].communication
+        for v in range(N):
+            Regrets[v][t], Communications[v][t] = Agents[v].regret, Agents[v].communication
 
     # group regrets and communications
     Group_Regrets = np.sum(np.array(Regrets), axis=0)
@@ -262,6 +277,24 @@ def run_ucb(problem, p):
     # fnames = [f"{path}/Communication_{wise}_{mp}_p={p}_gamma={Agents[0].gamma}_{Network.name}.pdf" for wise in
     #           ["agent", "group"]]
     # plot(Communications, Group_Communications, Network, titles, fnames)
+
+    # # plot number of messages passed around
+    # fig, ax = plt.subplots()
+    # clrs = sns.color_palette("husl", len(original_edges))
+    # xs = range(T)
+    #
+    # with sns.axes_style("darkgrid"):
+    #     for i, color in enumerate(clrs):
+    #         ax.plot(xs, Edge_Messages[i], label=f"{original_edges[i]}", c=color)
+    #         # ax.fill_between(xs, final_means[i] - final_stds[i], final_means[i] + final_stds[i],
+    #         #                 alpha=0.3, facecolor=color)
+    #
+    #     ax.set_title(f"[{problem.mp}] Number of messages per edge (gamma={problem.gamma}, discard={problem.discard}, n_gossip={problem.n_gossip})")
+    #     ax.set_xlabel("t")
+    #     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    #     plt.savefig(f"heterogeneous_K={problem.K}/Messages_{problem.mp}.pdf", dpi=1200, bbox_inches='tight')
+    #     # plt.show()
+    # print(Edge_Messages)
 
     return Group_Regrets[-1], Group_Communications[-1]
 

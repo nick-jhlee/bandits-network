@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-
 def plot(Regrets, Group_Regrets, Network, titles, fnames):
     # agent-wise quantity
     plt.figure(1)
@@ -33,7 +32,7 @@ def plot_final(final_means, final_stds, xs, title, xlabel, legends, fname):
     with sns.axes_style("darkgrid"):
         for i, color in enumerate(clrs):
             ax.plot(xs, final_means[i], label=legends[i], c=color)
-            ax.fill_between(xs, final_means[i]-final_stds[i], final_means[i]+final_stds[i],
+            ax.fill_between(xs, final_means[i] - final_stds[i], final_means[i] + final_stds[i],
                             alpha=0.3, facecolor=color)
 
     ax.set_title(title)
