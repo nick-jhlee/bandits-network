@@ -258,43 +258,7 @@ def run_ucb(problem, p):
     Group_Regrets = np.sum(np.array(Regrets), axis=0)
     Group_Communications = np.sum(np.array(Communications), axis=0)
 
-    # # plotting quantities vs. iteration
-    # path = f"heterogeneous/{mp}_n_gossip={n_gossip}_discard={discard}"
-    # if not os.path.exists(path):
-    #     os.makedirs(path)
-    #
-    # # plot regrets
-    # titles = [f"{mp}: {wise} Regrets ({Network.name}, p={p}, gamma={Agents[0].gamma}, n_gossip={n_gossip}, " \
-    #           f"Discard={discard})" for wise in ["Agent-specific", "Group"]]
-    # fnames = [f"{path}/Regret_{wise}_{mp}_p={p}_gamma={Agents[0].gamma}_{Network.name}.pdf" for wise in
-    #           ["agent", "group"]]
-    # plot(Regrets, Group_Regrets, Network, titles, fnames)
-    #
-    # # plot communications
-    # titles = [f"{mp}: {wise} Communications ({Network.name}, p={p}, gamma={Agents[0].gamma}, n_gossip={n_gossip}, " \
-    #           f"Discard={discard})" for wise in ["Agent-specific", "Group"]]
-    # fnames = [f"{path}/Communication_{wise}_{mp}_p={p}_gamma={Agents[0].gamma}_{Network.name}.pdf" for wise in
-    #           ["agent", "group"]]
-    # plot(Communications, Group_Communications, Network, titles, fnames)
-
-    # # plot number of messages passed around, for sparse edges only
-    # fig, ax = plt.subplots()
-    # clrs = sns.color_palette("husl", len(original_edges))
-    # xs = range(T)
-    #
-    # with sns.axes_style("darkgrid"):
-    #     for i, color in enumerate(clrs):
-    #         ax.plot(xs, Edge_Messages[i], label=f"{original_edges[i]}", c=color)
-    #         # ax.fill_between(xs, final_means[i] - final_stds[i], final_means[i] + final_stds[i],
-    #         #                 alpha=0.3, facecolor=color)
-    #
-    #     ax.set_title(f"[{problem.mp}] Number of messages per edge (gamma={problem.gamma}, p={problem.p}, discard={problem.discard}, n_gossip={problem.n_gossip})")
-    #     ax.set_xlabel("t")
-    #     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    #     plt.savefig(f"heterogeneous_K={problem.K}/Messages_{problem.mp}.pdf", dpi=1200, bbox_inches='tight')
-    #     # plt.show()
-
-    return Group_Regrets, Group_Communications
+    return Group_Regrets, Group_Communications, np.array(Edge_Messages)
 
 
 def interfere(messages):

@@ -21,9 +21,6 @@ def create_problem(Network, Agents, T, N, K, param):
 
 
 def main_parallel(Network, Agents_, T, N, K, discards, n_gossips, mps, gammas, ps, n_repeats, path):
-    final_regrets_mean, final_regrets_std = [], []
-    final_communications_mean, final_communications_std = [], []
-
     if len(gammas) == 1 and len(ps) > 1:
         exp_type = "vary_p"
     elif len(ps) == 1 and len(gammas) > 1:
@@ -81,12 +78,15 @@ def main_parallel(Network, Agents_, T, N, K, discards, n_gossips, mps, gammas, p
     def f(partial_param):
         total_regret = np.zeros((n_repeats, length))
         total_communication = np.zeros((n_repeats, length))
+        total_messages = np.zeros((len(Network.edges()), T))
 
         for repeat, i in product(range(n_repeats), range(length)):
             if exp_type == "vary_t":
                 idx = params.index(partial_param + (gamma, p, repeat))
                 total_regret[repeat][i] = everything[idx][0][i]
                 total_communication[repeat][i] = everything[idx][1][i]
+                if i == 0:  # update only once per update
+                    total_messages += everything[idx][2]
             else:
                 if exp_type == "vary_p":
                     idx = params.index(partial_param + (gamma, l[i], repeat))
@@ -97,7 +97,7 @@ def main_parallel(Network, Agents_, T, N, K, discards, n_gossips, mps, gammas, p
                 total_regret[repeat][i] = everything[idx][0][-1]
                 total_communication[repeat][i] = everything[idx][1][-1]
 
-        return total_regret, total_communication
+        return total_regret, total_communication, total_messages / n_repeats
 
     # collect datas in parallel
     partial_params = list(product(discards, n_gossips, mps))
@@ -105,11 +105,15 @@ def main_parallel(Network, Agents_, T, N, K, discards, n_gossips, mps, gammas, p
         finals = pool.map_async(f, partial_params)
         finals = finals.get()
 
-    for total_regret, total_communication in finals:
+    final_regrets_mean, final_regrets_std = [], []
+    final_communications_mean, final_communications_std = [], []
+    final_messages_means = []
+    for total_regret, total_communication, total_messages in finals:
         final_regrets_mean.append(np.mean(total_regret, axis=0))
         final_regrets_std.append(np.std(total_regret, axis=0))
         final_communications_mean.append(np.mean(total_communication, axis=0))
         final_communications_std.append(np.std(total_communication, axis=0))
+        final_messages_means.append(total_messages)
 
     if exp_type == "vary_p":
         title_regret = f"Final Regret ({Network.name}, gamma={gamma})"
@@ -136,7 +140,7 @@ def main_parallel(Network, Agents_, T, N, K, discards, n_gossips, mps, gammas, p
     np.savez(f"{fname_regret}.npz", final_regrets_mean, final_regrets_std)
     np.savez(f"{fname_communication}.npz", final_communications_mean, final_communications_std)
 
-    # plotting
+    # plotting regret and communication
     legends = [f"{mp} (n_gossip={n_gossip}, discard={discard})" for discard, n_gossip, mp in partial_params]
     plot_final(np.array(final_regrets_mean), np.array(final_regrets_std), l,
                title_regret, x_label, legends, f"{fname_regret}.pdf")
@@ -144,7 +148,28 @@ def main_parallel(Network, Agents_, T, N, K, discards, n_gossips, mps, gammas, p
     plot_final(np.array(final_communications_mean), np.array(final_communications_std), l,
                title_communication, x_label, legends, f"{fname_communication}.pdf")
 
+    # plotting number of messages passed around, per edge
+    if exp_type == "vary_t" and n_gossips == [None]:
+        original_edges = list(Network.edges())
+        for mp_idx, total_messages in enumerate(final_messages_means):
+            fig, ax = plt.subplots()
+            clrs = sns.color_palette("husl", len(original_edges))
+            xs = range(T)
+            mp = mps[mp_idx]
 
+            with sns.axes_style("darkgrid"):
+                for i, color in enumerate(clrs):
+                    ax.plot(xs, total_messages[i], label=f"{original_edges[i]}", c=color)
+                    # ax.fill_between(xs, final_means[i] - final_stds[i], final_means[i] + final_stds[i],
+                    #                 alpha=0.3, facecolor=color)
+
+                ax.set_title(f"[{mp}] Number of messages per edge (gamma={gamma}, p={p}, n_gossip=None)")
+                ax.set_xlabel("t")
+                ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+                plt.savefig(f"{path}/Messages_{mp}_p={p}_gamma={gamma}_{Network.name}.pdf", dpi=1200,
+                            bbox_inches='tight')
+                plt.close()
+                # plt.show()
 
 
 if __name__ == '__main__':
@@ -170,10 +195,6 @@ if __name__ == '__main__':
                 er_p = 0.1
                 Network = nx.erdos_renyi_graph(N, er_p, seed=2023)
                 Network.name = f"{RG_model}_{er_p}"
-                # connect the graph, if it's disconnected
-                if not nx.is_connected(Network):
-                    augment_edges = nx.k_edge_augmentation(Network, 1)
-                    Network.add_edges_from(augment_edges)
             elif RG_model == "SBM":
                 sbm_p, sbm_q = 0.9, 0.05
                 partition_size = N // num_clusters
@@ -185,6 +206,10 @@ if __name__ == '__main__':
                 Network.name = f"{RG_model}"
             else:
                 raise NotImplementedError(f"{RG_model} not yet implemented")
+            # connect the graph, if it's disconnected
+            if not nx.is_connected(Network):
+                augment_edges = nx.k_edge_augmentation(Network, 1)
+                Network.add_edges_from(augment_edges)
 
             # plant a clique with the global optimal arm K-1
             # cliques = list(nx.find_cliques(Network))
@@ -215,7 +240,7 @@ if __name__ == '__main__':
                         arm_set_i = total_arm_set[5 * i:5 * (i + 1)]
                     else:
                         arm_set_i = list(np.random.choice(total_arm_set, size=5, replace=False))
-                    # local optimal arm is the same for all agents
+                    # local optimal arm is the same for the maximal clique
                     if i in max_clique and K - 1 not in arm_set_i:
                         arm_set_i.append(K - 1)
                     Agents.append(Agent(i, arm_set_i, reward_avgs, Network, 0, 0, K))
@@ -246,20 +271,21 @@ if __name__ == '__main__':
             # compared baseline models
             # discards, n_gossips, mps = [False, True], [1, 3, None], ["MP", "Greedy-MP", "Hitting-MP"]
             # discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP", "corrupt-MP", "corrupt-Hitting-MP"]
-            discards, n_gossips, mps = [False], [3, None], ["baseline", f"MP{bandwidth}", f"Hitting-MP{bandwidth}"]
+            # discards, n_gossips, mps = [False], [3, None], ["baseline", f"MP{bandwidth}", f"Hitting-MP{bandwidth}"]
+            discards, n_gossips, mps = [False], [None], [f"MP{bandwidth}", f"Hitting-MP{bandwidth}"]
 
-            # Experiment #1. Effect of varying p
-            # p: probability that a message is *not* discarded, per link
-            ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-            gammas = [2]  # number of rounds for message passing
-            main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
-            plt.clf()
-
-            # Experiment #2. Effect of gamma, under perfect communication
-            gammas = [1, 2, 3, 4]  # max number of rounds for message passing
-            ps = [1.0]
-            main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
-            plt.clf()
+            # # Experiment #1. Effect of varying p
+            # # p: probability that a message is *not* discarded, per link
+            # ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+            # gammas = [2]  # number of rounds for message passing
+            # main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
+            # plt.clf()
+            #
+            # # Experiment #2. Effect of gamma, under perfect communication
+            # gammas = [1, 2, 3, 4]  # max number of rounds for message passing
+            # ps = [1.0]
+            # main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
+            # plt.clf()
 
             # Experiment #3. Comparing regrets (over iteration t)
             gammas = [3]  # max number of rounds for message passing
