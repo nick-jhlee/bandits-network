@@ -218,7 +218,7 @@ def run_ucb(problem, p):
         for v in range(N):
             messages = total_messages[v]
 
-            if mp == "baseline" or ("bandwidth" in mp and len(messages) >= 200):
+            if mp == "baseline" or ("bandwidth" in mp and len(messages) >= 150):
                 del messages
             else:
                 neighbors = Network.adj[v]

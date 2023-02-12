@@ -115,7 +115,7 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
         fname_regret = f"{path}/Regret_final_p_gamma={gamma}_{Network.name}"
 
         title_communication = f"Final Communication ({Network.name}, gamma={gamma})"
-        fname_communication = f"heterogeneous_K={K}/Communication_final_p_gamma={gamma}_{Network.name}"
+        fname_communication = f"{path}/Communication_final_p_gamma={gamma}_{Network.name}"
     elif exp_type == "vary_gamma":
         title_regret = f"Final Regret ({Network.name}, p={p})"
         fname_regret = f"{path}/Regret_final_gamma_p={p}_{Network.name}"
@@ -145,7 +145,7 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
 
 
 if __name__ == '__main__':
-    T = int(1e3)  # number of iterations
+    T = int(1e4)  # number of iterations
     num_clusters = 4
     N = 5 * num_clusters  # number of agents
     K = 20  # total number of arms
@@ -243,17 +243,23 @@ if __name__ == '__main__':
             # compared baseline models
             # discards, n_gossips, mps = [False, True], [1, 3, None], ["MP", "Greedy-MP", "Hitting-MP"]
             # discards, n_gossips, mps = [False], [None], ["MP", "Hitting-MP", "corrupt-MP", "corrupt-Hitting-MP"]
-            discards, n_gossips, mps = [False], [None], ["baseline", f"MP{bandwidth}", f"Hitting-MP{bandwidth}"]
+            discards, n_gossips, mps = [False], [3, None], ["baseline", f"MP{bandwidth}", f"Hitting-MP{bandwidth}"]
 
             # Experiment #1. Effect of varying p
             # p: probability that a message is *not* discarded, per link
             ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
             gammas = [2]  # number of rounds for message passing
             main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
+            plt.clf()
 
             # Experiment #2. Effect of gamma, under perfect communication
             gammas = [1, 2, 3, 4]  # max number of rounds for message passing
             ps = [1.0]
             main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
+            plt.clf()
 
+            # Experiment #3. Comparing regrets (over iteration t)
+            gammas = [3]  # max number of rounds for message passing
+            ps = [1.0]
+            main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, 10, path)
             plt.clf()
