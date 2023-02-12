@@ -20,7 +20,7 @@ def create_problem(Network, Agents, T, N, K, param):
     return Problem(Network, Agents, T, N, K, param)
 
 
-def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps, n_repeats, path):
+def main_parallel(Network, Agents_, T, N, K, discards, n_gossips, mps, gammas, ps, n_repeats, path):
     final_regrets_mean, final_regrets_std = [], []
     final_communications_mean, final_communications_std = [], []
 
@@ -41,6 +41,7 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
         np.random.seed(int.from_bytes(os.urandom(4), byteorder='little'))
 
         # create problem instance
+        Agents = deepcopy(Agents_)
         problem = create_problem(Network, Agents, T, N, K, param)
         result = run_ucb(problem, param[-2])
 
@@ -144,8 +145,10 @@ def main_parallel(Network, Agents, T, N, K, discards, n_gossips, mps, gammas, ps
                title_communication, x_label, legends, f"{fname_communication}.pdf")
 
 
+
+
 if __name__ == '__main__':
-    T = int(1e4)  # number of iterations
+    T = int(1e3)  # number of iterations
     num_clusters = 4
     N = 5 * num_clusters  # number of agents
     K = 20  # total number of arms
