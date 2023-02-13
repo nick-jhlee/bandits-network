@@ -9,8 +9,8 @@ from copy import deepcopy
 
 class Problem:
     def __init__(self, Network, Agents, T, N, K, param):
-        # param: (n_gossip, mp, gamma, p, n_repeat)
-        n_gossip, mp, gamma, p, n_repeat = param
+        # param: (mp, n_gossip, gamma, p, n_repeat)
+        mp, n_gossip, gamma, p, n_repeat = param
 
         self.Agents = Agents
         self.Network = Network
@@ -28,14 +28,18 @@ class Problem:
 
 
 class Message:
-    def __init__(self, arm, reward, hash_value, gamma):
+    def __init__(self, arm, reward, hash_value, v_prev, gamma):
         self.arm = arm
         self.reward = reward
         self.hash_value = hash_value
+        self.v_prev = v_prev
         self.gamma = gamma
 
     def decay(self):
         self.gamma -= 1
+
+    def update(self, v):
+        self.v_prev = v
 
     def corrupt(self, mp):
         if np.random.binomial(1, 0.5) == 1:
@@ -91,6 +95,7 @@ class Agent:
         # hash values of messages that he has seen
         self.history = set()
 
+    # one round of UCB_network
     def UCB_network(self):
         # warm-up
         if self.t < len(self.arm_set):
@@ -136,7 +141,7 @@ class Agent:
         self.t += 1
 
         # message to be sent to his neighbors
-        return Message(arm, reward, hash((arm, reward)), self.gamma)
+        return Message(arm, reward, hash((self.idx, arm, reward)), self.idx, self.gamma - 1)
 
     def store_message(self, message):
         message.decay()
@@ -145,6 +150,7 @@ class Agent:
         if message.gamma < 0:  # if the message is not yet expired, for MP
             del message
         else:
+            message.update(self.idx)  # update message.v_prev to the current agent
             self.messages.append(message)
 
     def receive_message(self, message):
@@ -159,7 +165,7 @@ class Agent:
             self.total_rewards[arm] += reward
 
     def receive(self, messages):
-        while messages:  # if d is True if d is not empty (canonical way for all collections)
+        while messages:  # d is True if d is not empty (canonical way for all collections)
             message = messages.pop()
             if message is not None:
                 contain_message = message.arm in self.arm_set
@@ -177,6 +183,8 @@ class Agent:
                         self.store_message(message)
                 else:
                     del message
+            else:
+                del message
 
 
 def run_ucb(problem, p):
@@ -193,8 +201,6 @@ def run_ucb(problem, p):
     Regrets = [[0 for _ in range(T)] for _ in range(N)]
     Communications = [[0 for _ in range(T)] for _ in range(N)]
     Edge_Messages = [[0 for _ in range(T)] for _ in range(len(original_edges))]
-
-    min_deg = min((d for _, d in Network.degree()))
 
     # run UCB
     # for t in tqdm(range(T)):
@@ -221,26 +227,32 @@ def run_ucb(problem, p):
                 # message broadcasting
                 while messages:
                     message = messages.pop()
-                    # construct neighbors to which the message will be gossiped to (push protocol!)
-                    if n_gossip is None or n_gossip >= len(neighbors):
-                        gossip_neighbors = neighbors
+                    if message is None:
+                        del message
                     else:
-                        gossip_neighbors = np.random.choice(neighbors, size=n_gossip, replace=False)
-                    # pass messages
-                    for neighbor in gossip_neighbors:
-                        message_copy = deepcopy(message)
-                        # update communication complexity
-                        Agents[v].communication += 1
-                        # update number of messages per edge
-                        if v < neighbor:
-                            Edge_Messages[original_edges.index((v, neighbor))][t] += 1
+                        # remove the previously originating agent
+                        neighbors_new = [nbhd for nbhd in neighbors if nbhd != message.v_prev]
+
+                        # construct neighbors to which the message will be gossiped to (push protocol)
+                        if n_gossip is None or n_gossip >= len(neighbors_new):
+                            gossip_neighbors = neighbors_new
                         else:
-                            Edge_Messages[original_edges.index((neighbor, v))][t] += 1
-                        # send messages
-                        if np.random.binomial(1, p) == 0:  # message failure
-                            Agents[neighbor].receive(deque([None]), Agents[v])
-                        else:
-                            Agents[neighbor].receive(deque([message_copy]))
+                            gossip_neighbors = np.random.choice(neighbors_new, size=n_gossip, replace=False)
+                        # pass messages
+                        for neighbor in gossip_neighbors:
+                            message_copy = deepcopy(message)
+                            # update communication complexity
+                            Agents[v].communication += 1
+                            # update number of messages per edge
+                            if v < neighbor:
+                                Edge_Messages[original_edges.index((v, neighbor))][t] += 1
+                            else:
+                                Edge_Messages[original_edges.index((neighbor, v))][t] += 1
+                            # send messages
+                            if np.random.binomial(1, p) == 0:  # message failure
+                                Agents[neighbor].receive(deque([None]))
+                            else:
+                                Agents[neighbor].receive(deque([message_copy]))
                     # delete the message sent by the originating agent, after communication is complete
                     del message
 
@@ -255,9 +267,6 @@ def run_ucb(problem, p):
 
 
 def interfere(messages):
-    # if len(tmp) > 5:
-    #     self.messages = deque(np.random.choice(self.messages, 5))
-    # return self.messages
     messages_arms = deque(message.arm for message in messages)
     for message in messages:
         if messages_arms.count(message.arm) > 1:

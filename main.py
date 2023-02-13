@@ -2,14 +2,15 @@ from algorithms import *
 import multiprocess
 from multiprocess import Pool
 import networkx as nx
+from math import log
 
 from itertools import product
 import os
 
 
 def create_problem(Network, Agents, T, N, K, param):
-    # param: (n_gossip, mp, gamma, p, n_repeat)
-    _, mp, gamma, _, _ = param
+    # param: (mp, n_gossip, gamma, p, n_repeat)
+    mp, _, gamma, _, _ = param
 
     # set gamma and MP protocols in Agents
     for agent in Agents:
@@ -20,7 +21,7 @@ def create_problem(Network, Agents, T, N, K, param):
     return Problem(Network, Agents, T, N, K, param)
 
 
-def main_parallel(Network, Agents_, T, N, K, n_gossips, mps, gammas, ps, n_repeats, path):
+def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repeats, path):
     if len(gammas) == 1 and len(ps) > 1:
         exp_type = "vary_p"
     elif len(ps) == 1 and len(gammas) > 1:
@@ -31,8 +32,11 @@ def main_parallel(Network, Agents_, T, N, K, n_gossips, mps, gammas, ps, n_repea
         raise ValueError("Are we fixing p or gamma?")
 
     # n_gossip, mp, gamma, p, repeat
-    params = list(product(n_gossips, mps, gammas, ps, range(n_repeats)))
-    params = [item for item in params if item[1] != "baseline" or (item[1] == "baseline" and item[0] is None)]
+    params = list(product(mps, n_gossips, gammas, ps, range(n_repeats)))
+    # run experiment only once for baseline
+    params = [item for item in params if item[0] != "baseline" or (item[0] == "baseline" and item[1] is None)]
+    # remove Hitting+Gossiping
+    params = [item for item in params if "Hitting" not in item[0] or item[1] is None]
 
     def F(param):
         # reseeding!
@@ -101,8 +105,13 @@ def main_parallel(Network, Agents_, T, N, K, n_gossips, mps, gammas, ps, n_repea
         return total_regret, total_communication, total_messages / n_repeats
 
     # collect datas in parallel
-    partial_params = list(product(n_gossips, mps))
-    partial_params = [item for item in partial_params if item[1] != "baseline" or (item[1] == "baseline" and item[0] is None)]
+    partial_params = list(product(mps, n_gossips))
+    # run experiment only once for baseline
+    partial_params = [item for item in partial_params if
+                      item[0] != "baseline" or (item[0] == "baseline" and item[1] is None)]
+    # remove Hitting+Gossiping
+    partial_params = [item for item in partial_params if "Hitting" not in item[0] or item[1] is None]
+
     with Pool() as pool:
         finals = pool.map_async(f, partial_params)
         finals = finals.get()
@@ -143,7 +152,7 @@ def main_parallel(Network, Agents_, T, N, K, n_gossips, mps, gammas, ps, n_repea
     np.savez(f"{fname_communication}.npz", final_communications_mean, final_communications_std)
 
     # plotting regret and communication
-    legends = [f"{mp} (n_gossip={n_gossip})" for n_gossip, mp in partial_params]
+    legends = [f"{mp} (n_gossip={n_gossip})" for mp, n_gossip in partial_params]
     plot_final(np.array(final_regrets_mean), np.array(final_regrets_std), l,
                title_regret, x_label, legends, f"{fname_regret}.pdf")
 
@@ -175,9 +184,12 @@ def main_parallel(Network, Agents_, T, N, K, n_gossips, mps, gammas, ps, n_repea
 
 
 if __name__ == '__main__':
+    num_clusters = 2  # for SBM
+    size_cluster = 10
+    N = size_cluster * num_clusters  # number of agents
+    er_p = 2 * log(N) / N
+
     T = int(1e3)  # number of iterations
-    num_clusters = 4    # for SBM
-    N = 5 * num_clusters  # number of agents
     K = 20  # total number of arms
     k = 10  # number of arms per agent
 
@@ -198,40 +210,39 @@ if __name__ == '__main__':
 
     # experiments
     for bandwidth in ["", "-bandwidth"]:
-        for RG_model in ['ER', 'BA', 'Barbell']:
-            print(f"N={N},K={K},k={k},T={T}")
+        for RG_model in ['BA', 'SBM', 'ER']:
+            print(f"{bandwidth}, {RG_model}; N={N},K={K},k={k},T={T}")
 
             path = f"results/heterogeneous_K={K}{bandwidth}"
 
             # create path
             if not os.path.exists(path):
                 os.makedirs(path)
+                os.makedirs(path + f"/{RG_model}")
             if not os.path.exists(f"{path}/networks"):
                 os.makedirs(f"{path}/networks")
 
             # create communication network
             if RG_model == "ER":
-                er_p = 0.1
                 Network = nx.erdos_renyi_graph(N, er_p, seed=2023)
+                # if the graph is disconnected, keep trying other seeds until the graph is connected.
+                u = 1
+                while not nx.is_connected(Network):
+                    Network = nx.erdos_renyi_graph(N, er_p, seed=2023 + u)
+                    u += 1
                 Network.name = f"{RG_model}_{er_p}"
             elif RG_model == "BA":
                 Network = nx.barabasi_albert_graph(N, 5, seed=2023)
                 Network.name = f"{RG_model}"
-            elif RG_model == "Barbell":
-                Network = nx.barbell_graph(N//2, 1)
-                Network.name = f"{RG_model}"
             elif RG_model == "SBM":
-                sbm_p, sbm_q = 0.9, 0.05
-                partition_size = N // num_clusters
-                Network = nx.random_partition_graph([partition_size for _ in range(num_clusters)], sbm_p, sbm_q,
-                                                    seed=2023)
+                sbm_p, sbm_q = er_p, 0.01
+                Network = nx.random_partition_graph([size_cluster for _ in range(num_clusters)], sbm_p, sbm_q, seed=2023)
                 Network.name = f"{RG_model}_{sbm_p}_{sbm_q}"
+            elif RG_model == "Barbell":
+                Network = nx.barbell_graph(N // 2, 1)
+                Network.name = f"{RG_model}"
             else:
                 raise NotImplementedError(f"{RG_model} not yet implemented")
-            # connect the graph, if it's disconnected
-            if not nx.is_connected(Network):
-                augment_edges = nx.k_edge_augmentation(Network, 1)
-                Network.add_edges_from(augment_edges)
 
             # plant a clique with the global optimal arm K-1
             # cliques = list(nx.find_cliques(Network))
@@ -266,26 +277,29 @@ if __name__ == '__main__':
                 plt.close()
                 # plt.show()
 
-            # models for comparison
-            # n_gossips, mps = [None], ["MP", "Hitting-MP", "corrupt-MP", "corrupt-Hitting-MP"]
-            # n_gossips, mps = [1, None], [f"MP{bandwidth}", f"Hitting-MP{bandwidth}"]
-            n_gossips, mps = [1, None], [f"baseline, MP{bandwidth}", f"Hitting-MP{bandwidth}"]
+            # algorithms for comparison
+            mps, n_gossips = ["baseline", f"MP{bandwidth}", f"Hitting-MP{bandwidth}"], [None, 1]
 
             # Experiment #1.1 Comparing regrets (over iteration t)
-            gammas = [3]  # max number of rounds for message passing
+            gammas = [2]
             ps = [1.0]
-            main_parallel(Network, Agents, T, N, K, n_gossips, mps, gammas, ps, 10, path)
+            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+            plt.clf()
+
+            gammas = [3]
+            ps = [1.0]
+            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
             plt.clf()
 
             # Experiment #1.2 Effect of varying p
             # p: probability that a message is *not* lost
             ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
             gammas = [2]  # number of rounds for message passing
-            main_parallel(Network, Agents, T, N, K, n_gossips, mps, gammas, ps, 10, path)
+            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
             plt.clf()
 
             # Experiment #1.3 Effect of gamma, under perfect communication
             gammas = [1, 2, 3, 4]  # max number of rounds for message passing
             ps = [1.0]
-            main_parallel(Network, Agents, T, N, K, n_gossips, mps, gammas, ps, 10, path)
+            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
             plt.clf()
