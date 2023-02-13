@@ -9,15 +9,14 @@ from copy import deepcopy
 
 class Problem:
     def __init__(self, Network, Agents, T, N, K, param):
-        # param: (discard, n_gossip, mp, gamma, p, n_repeat)
-        discard, n_gossip, mp, gamma, p, n_repeat = param
+        # param: (n_gossip, mp, gamma, p, n_repeat)
+        n_gossip, mp, gamma, p, n_repeat = param
 
         self.Agents = Agents
         self.Network = Network
 
         self.T, self.N, self.K = T, N, K
 
-        self.discard = discard
         self.n_gossip = n_gossip
         self.mp = mp
         self.gamma = gamma
@@ -25,7 +24,7 @@ class Problem:
         self.n_repeat = n_repeat
 
     def __str__(self):
-        return f"discard={self.discard}, n_gossip={self.n_gossip}, {self.mp}"
+        return f"{self.mp}, n_gossip={self.n_gossip}"
 
 
 class Message:
@@ -159,26 +158,23 @@ class Agent:
             self.total_visitations[arm] += 1
             self.total_rewards[arm] += reward
 
-    def receive(self, messages, p_v=1):
+    def receive(self, messages):
         while messages:  # if d is True if d is not empty (canonical way for all collections)
             message = messages.pop()
             if message is not None:
                 contain_message = message.arm in self.arm_set
-                if np.random.binomial(1, p_v) == 1:  # if discarding does not take place
-                    # receive, depending on the communication protocol!
-                    if "MP" in self.mp:
-                        if "Hitting" in self.mp:
-                            if contain_message:
-                                self.receive_message(message)
-                                del message
-                            else:
-                                self.store_message(message)
+                # receive, depending on the communication protocol!
+                if "MP" in self.mp:
+                    if "Hitting" in self.mp:
+                        if contain_message:
+                            self.receive_message(message)
+                            del message
                         else:
-                            if contain_message:
-                                self.receive_message(message)
                             self.store_message(message)
                     else:
-                        del message
+                        if contain_message:
+                            self.receive_message(message)
+                        self.store_message(message)
                 else:
                     del message
 
@@ -190,7 +186,7 @@ def run_ucb(problem, p):
     # initialize parameters
     T, N = problem.T, problem.N
     Agents, Network = problem.Agents, problem.Network
-    discard, n_gossip, mp = problem.discard, problem.n_gossip, problem.mp
+    n_gossip, mp = problem.n_gossip, problem.mp
     original_edges = list(Network.edges())
 
     # for logging
@@ -244,10 +240,7 @@ def run_ucb(problem, p):
                         if np.random.binomial(1, p) == 0:  # message failure
                             Agents[neighbor].receive(deque([None]), Agents[v])
                         else:
-                            if discard:
-                                Agents[neighbor].receive(deque([message_copy]), min_deg / Network.degree[neighbor])
-                            else:
-                                Agents[neighbor].receive(deque([message_copy]))
+                            Agents[neighbor].receive(deque([message_copy]))
                     # delete the message sent by the originating agent, after communication is complete
                     del message
 
