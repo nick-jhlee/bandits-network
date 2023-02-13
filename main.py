@@ -189,74 +189,90 @@ if __name__ == '__main__':
     N = size_cluster * num_clusters  # number of agents
     er_p = 2 * log(N) / N
 
+    # create communication networks
+    Networks = {}
+    if not os.path.exists("results/networks"):
+        os.makedirs("results/networks")
+
+    ## Erodos-Renyi
+    Network_ER = nx.erdos_renyi_graph(N, er_p, seed=2023)
+    Network_ER.name = f"ER_{er_p}"
+    # if the graph is disconnected, keep trying other seeds until the graph is connected.
+    u = 1
+    while not nx.is_connected(Network_ER):
+        Network_ER = nx.erdos_renyi_graph(N, er_p, seed=2023 + u)
+        u += 1
+    pos_ER = nx.spring_layout(Network_ER)
+    Networks['ER'] = (Network_ER, pos_ER)
+    plot_network(Network_ER, pos_ER)
+
+    ## Barabasi-Albert
+    m = 5
+    Network_BA = nx.barabasi_albert_graph(N, m, seed=2023)
+    Network_BA.name = f"BA_{m}"
+    pos_BA = nx.spring_layout(Network_BA)
+    Networks['BA'] = (Network_BA, pos_BA)
+    plot_network(Network_BA, pos_BA)
+
+    ## Binary SBM
+    sbm_p, sbm_q = 2 * er_p, 0.01
+    Network_SBM = nx.random_partition_graph([size_cluster for _ in range(num_clusters)], sbm_p, sbm_q, seed=2023)
+    Network_SBM.name = f"SBM_{sbm_p}_{sbm_q}"
+    pos_SBM = nx.spring_layout(Network_SBM)
+    Networks['SBM'] = (Network_SBM, pos_SBM)
+    plot_network(Network_SBM, pos_SBM)
+
+    ## Barbell model
+    Network_Barbell = nx.barbell_graph(N // 2, 0)
+    Network_Barbell.name = "Barbell"
+    pos_Barbell = nx.spring_layout(Network_Barbell)
+    Networks['Barbell'] = (Network_Barbell, pos_Barbell)
+    plot_network(Network_Barbell, pos_Barbell)
+
     T = int(1e3)  # number of iterations
     K = 20  # total number of arms
     k = 10  # number of arms per agent
 
     # arm set and their mean rewards
-    tmp = np.random.uniform(size=K)
+    if not os.path.exists("results/means.npz"):
+        tmp = np.random.uniform(size=K)
+        np.savez("results/means.npz", tmp=tmp)
+    else:
+        tmp = np.load("results/means.npz")
+        tmp = tmp['tmp']
     # tmp = [0.5 * int(k == K-1) + 0.5 for k in range(K)]
     # tmp = [np.random.uniform() * int(k != K-1) + int(k == K-1) for k in range(K)]
     reward_avgs = {a: tmp[a] for a in range(K)}
     total_arm_set = list(range(K))
 
     # distributing the arms uniformly at random, until the union over all agents is the whole set
-    while True:
-        arm_sets = [set(np.random.choice(total_arm_set, size=k, replace=False)) for _ in range(N)]
+    if not os.path.exists("results/arm_sets.npz"):
+        while True:
+            arm_sets = [set(np.random.choice(total_arm_set, size=k, replace=False)) for _ in range(N)]
 
-        if set(range(K)) == set.union(*arm_sets):
-            arm_sets = [list(item) for item in arm_sets]
-            break
+            if set(range(K)) == set.union(*arm_sets):
+                arm_sets = [list(item) for item in arm_sets]
+                break
+        np.savez("results/arm_sets.npz", arm_sets=arm_sets)
+    else:
+        arm_sets = np.load("results/arm_sets.npz")
+        arm_sets = arm_sets['arm_sets']
 
     # experiments
-    for bandwidth in ["", "-bandwidth"]:
-        for RG_model in ['BA', 'SBM', 'ER']:
+    for RG_model in ['SBM', 'BA', 'ER', 'Barbell']:
+        for bandwidth in ["", "-bandwidth"]:
             print(f"{bandwidth}, {RG_model}; N={N},K={K},k={k},T={T}")
-
             path = f"results/heterogeneous_K={K}{bandwidth}"
-
-            # create path
+            # create paths
             if not os.path.exists(path):
                 os.makedirs(path)
+            if not os.path.exists(path + f"/{RG_model}"):
                 os.makedirs(path + f"/{RG_model}")
             if not os.path.exists(f"{path}/networks"):
                 os.makedirs(f"{path}/networks")
 
-            # create communication network
-            if RG_model == "ER":
-                Network = nx.erdos_renyi_graph(N, er_p, seed=2023)
-                # if the graph is disconnected, keep trying other seeds until the graph is connected.
-                u = 1
-                while not nx.is_connected(Network):
-                    Network = nx.erdos_renyi_graph(N, er_p, seed=2023 + u)
-                    u += 1
-                Network.name = f"{RG_model}_{er_p}"
-            elif RG_model == "BA":
-                Network = nx.barabasi_albert_graph(N, 5, seed=2023)
-                Network.name = f"{RG_model}"
-            elif RG_model == "SBM":
-                sbm_p, sbm_q = er_p, 0.01
-                Network = nx.random_partition_graph([size_cluster for _ in range(num_clusters)], sbm_p, sbm_q, seed=2023)
-                Network.name = f"{RG_model}_{sbm_p}_{sbm_q}"
-            elif RG_model == "Barbell":
-                Network = nx.barbell_graph(N // 2, 1)
-                Network.name = f"{RG_model}"
-            else:
-                raise NotImplementedError(f"{RG_model} not yet implemented")
-
-            # plant a clique with the global optimal arm K-1
-            # cliques = list(nx.find_cliques(Network))
-            # clique_sizes = [len(clique) for clique in cliques]
-            # max_clique = cliques[np.argmax(clique_sizes)]
-            max_clique = []
-
-            # plot total network
-            pos = nx.spring_layout(Network)
-            f = plt.figure(100)
-            nx.draw_networkx(Network, with_labels=True, pos=pos)
-            f.savefig(f"{path}/networks/{Network.name}.pdf", bbox_inches='tight')
-            # plt.show()
-            plt.close()
+            # load Network
+            Network, pos = Networks[RG_model]
 
             # create agents with k-uniformly distributed arms
             Agents = [Agent(v, arm_sets[v], reward_avgs, Network, 0, 0, K) for v in range(N)]
@@ -273,7 +289,7 @@ if __name__ == '__main__':
                 # color the agents corresponding to the arm
                 f = plt.figure(1000 * arm)
                 nx.draw_networkx(Network, node_color=color_map, pos=pos, with_labels=True)
-                f.savefig(f"{path}/networks/{Network.name}_{arm}.pdf", bbox_inches='tight')
+                f.savefig(f"results/networks/{Network.name}_{arm}.pdf", bbox_inches='tight')
                 plt.close()
                 # plt.show()
 

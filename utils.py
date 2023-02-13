@@ -1,4 +1,5 @@
 import numpy as np
+import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -40,3 +41,13 @@ def plot_final(final_means, final_stds, xs, title, xlabel, legends, fname):
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     plt.savefig(fname, dpi=1200, bbox_inches='tight')
     # plt.show()
+
+
+def plot_network(Network, pos=None):
+    if pos is None:
+        pos = nx.spring_layout(Network)
+    f = plt.figure(100)
+    nx.draw_networkx(Network, with_labels=True, pos=pos)
+    f.savefig(f"results/networks/{Network.name}.pdf", bbox_inches='tight')
+    # plt.show()
+    plt.close()
