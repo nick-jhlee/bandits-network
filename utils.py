@@ -40,14 +40,37 @@ def plot_final(final_means, final_stds, xs, title, xlabel, legends, fname):
     ax.set_xlabel(xlabel)
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     plt.savefig(fname, dpi=1200, bbox_inches='tight')
+    plt.close()
     # plt.show()
 
 
-def plot_network(Network, pos=None):
+def plot_final_discrete(final_means, final_stds, xs, title, xlabel, legends, fname):
+    fig, ax = plt.subplots()
+    clrs = sns.color_palette("husl", len(legends))
+
+    with sns.axes_style("darkgrid"):
+        for i, color in enumerate(clrs):
+            ax.errorbar(xs, final_means[i], yerr=final_stds[i], fmt='o', linestyle='dashed', capsize=3,
+                        label=legends[i], c=color)
+
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.savefig(fname, dpi=1200, bbox_inches='tight')
+    plt.close()
+    # plt.show()
+
+
+def plot_network(Network, pos=None, fname=None, node_color=None):
+    plt.figure(1000)
     if pos is None:
         pos = nx.spring_layout(Network)
-    f = plt.figure(100)
-    nx.draw_networkx(Network, with_labels=True, pos=pos)
-    f.savefig(f"results/networks/{Network.name}.pdf", bbox_inches='tight')
-    # plt.show()
+    if fname is None:
+        fname = f"results/networks/{Network.name}.pdf"
+    if node_color is None:
+        nx.draw_networkx(Network, with_labels=True, pos=pos, node_size=100, font_size=8)
+    else:
+        nx.draw_networkx(Network, node_color=node_color, with_labels=True, pos=pos, node_size=100, font_size=8)
+    plt.savefig(fname, bbox_inches='tight')
     plt.close()
+    # plt.show()

@@ -153,11 +153,15 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
 
     # plotting regret and communication
     legends = [f"{mp} (n_gossip={n_gossip})" for mp, n_gossip in partial_params]
-    plot_final(np.array(final_regrets_mean), np.array(final_regrets_std), l,
-               title_regret, x_label, legends, f"{fname_regret}.pdf")
+    if exp_type == "vary_gamma":
+        plot = plot_final_discrete
+    else:
+        plot = plot_final
 
-    plot_final(np.array(final_communications_mean), np.array(final_communications_std), l,
-               title_communication, x_label, legends, f"{fname_communication}.pdf")
+    plot(np.array(final_regrets_mean), np.array(final_regrets_std), l,
+         title_regret, x_label, legends, f"{fname_regret}.pdf")
+    plot(np.array(final_communications_mean), np.array(final_communications_std), l,
+         title_communication, x_label, legends, f"{fname_communication}.pdf")
 
     # plotting number of messages passed around, per edge
     if exp_type == "vary_t" and n_gossips == [None]:
@@ -185,9 +189,9 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
 
 if __name__ == '__main__':
     num_clusters = 2  # for SBM
-    size_cluster = 10
+    size_cluster = 50
     N = size_cluster * num_clusters  # number of agents
-    er_p = 2 * log(N) / N
+    er_p = 1.01 * log(N) / N
 
     # create communication networks
     Networks = {}
@@ -195,19 +199,18 @@ if __name__ == '__main__':
         os.makedirs("results/networks")
 
     ## Erodos-Renyi
-    Network_ER = nx.erdos_renyi_graph(N, er_p, seed=2023)
-    Network_ER.name = f"ER_{er_p}"
     # if the graph is disconnected, keep trying other seeds until the graph is connected.
-    u = 1
-    while not nx.is_connected(Network_ER):
-        Network_ER = nx.erdos_renyi_graph(N, er_p, seed=2023 + u)
+    u = 2023
+    while not nx.is_connected(nx.erdos_renyi_graph(N, er_p, seed=u)):
         u += 1
+    Network_ER = nx.erdos_renyi_graph(N, er_p, seed=u)
+    Network_ER.name = f"ER_{er_p}"
     pos_ER = nx.spring_layout(Network_ER)
     Networks['ER'] = (Network_ER, pos_ER)
     plot_network(Network_ER, pos_ER)
 
     ## Barabasi-Albert
-    m = 5
+    m = 3
     Network_BA = nx.barabasi_albert_graph(N, m, seed=2023)
     Network_BA.name = f"BA_{m}"
     pos_BA = nx.spring_layout(Network_BA)
@@ -215,7 +218,7 @@ if __name__ == '__main__':
     plot_network(Network_BA, pos_BA)
 
     ## Binary SBM
-    sbm_p, sbm_q = 2 * er_p, 0.01
+    sbm_p, sbm_q = 3 * er_p, 0.001
     Network_SBM = nx.random_partition_graph([size_cluster for _ in range(num_clusters)], sbm_p, sbm_q, seed=2023)
     Network_SBM.name = f"SBM_{sbm_p}_{sbm_q}"
     pos_SBM = nx.spring_layout(Network_SBM)
@@ -229,8 +232,8 @@ if __name__ == '__main__':
     Networks['Barbell'] = (Network_Barbell, pos_Barbell)
     plot_network(Network_Barbell, pos_Barbell)
 
-    T = int(1e3)  # number of iterations
-    K = 20  # total number of arms
+    T = int(1e4)  # number of iterations
+    K = 30  # total number of arms
     k = 10  # number of arms per agent
 
     # arm set and their mean rewards
@@ -259,7 +262,7 @@ if __name__ == '__main__':
         arm_sets = arm_sets['arm_sets']
 
     # experiments
-    for RG_model in ['SBM', 'BA', 'ER', 'Barbell']:
+    for RG_model in ['ER', 'SBM', 'BA', 'Barbell']:
         for bandwidth in ["", "-bandwidth"]:
             print(f"{bandwidth}, {RG_model}; N={N},K={K},k={k},T={T}")
             path = f"results/heterogeneous_K={K}{bandwidth}"
@@ -288,15 +291,17 @@ if __name__ == '__main__':
 
                 # color the agents corresponding to the arm
                 f = plt.figure(1000 * arm)
-                nx.draw_networkx(Network, node_color=color_map, pos=pos, with_labels=True)
-                f.savefig(f"results/networks/{Network.name}_{arm}.pdf", bbox_inches='tight')
-                plt.close()
-                # plt.show()
+                plot_network(Network, pos, f"results/networks/{Network.name}_{arm}.pdf", color_map)
 
             # algorithms for comparison
             mps, n_gossips = ["baseline", f"MP{bandwidth}", f"Hitting-MP{bandwidth}"], [None, 1]
 
             # Experiment #1.1 Comparing regrets (over iteration t)
+            gammas = [1]
+            ps = [1.0]
+            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+            plt.clf()
+
             gammas = [2]
             ps = [1.0]
             main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
@@ -309,7 +314,7 @@ if __name__ == '__main__':
 
             # Experiment #1.2 Effect of varying p
             # p: probability that a message is *not* lost
-            ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+            ps = list(np.linspace(0, 1.0, num=21))
             gammas = [2]  # number of rounds for message passing
             main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
             plt.clf()
