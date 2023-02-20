@@ -171,15 +171,13 @@ class Agent:
                 contain_message = message.arm in self.arm_set
                 # receive, depending on the communication protocol!
                 if "MP" in self.mp:
-                    if "Hitting" in self.mp:
-                        if contain_message:
-                            self.receive_message(message)
+                    if contain_message:
+                        self.receive_message(message)
+                        if "Hitting" in self.mp:
                             del message
                         else:
                             self.store_message(message)
                     else:
-                        if contain_message:
-                            self.receive_message(message)
                         self.store_message(message)
                 else:
                     del message

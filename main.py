@@ -262,7 +262,7 @@ if __name__ == '__main__':
         arm_sets = arm_sets['arm_sets']
 
     # experiments
-    for RG_model in ['ER', 'SBM', 'BA', 'Barbell']:
+    for RG_model in ['ER', 'BA', 'SBM']:
         for bandwidth in ["", "-bandwidth"]:
             print(f"{bandwidth}, {RG_model}; N={N},K={K},k={k},T={T}")
             path = f"results/heterogeneous_K={K}{bandwidth}"
