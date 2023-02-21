@@ -93,7 +93,7 @@ class Agent:
         self.total_visitations = dict.fromkeys(arm_set, 0)
 
         # hash values of messages that he has seen
-        self.history = set()
+        self.history = deque(maxlen=gamma*len(Network))
 
     # one round of UCB_network
     def UCB_network(self):
@@ -112,7 +112,7 @@ class Agent:
                     tmp = ucb
         # finalize the set of messages to be passed along
         cur_message = self.pull(final_arm)
-        self.history.add(cur_message.hash_value)
+        self.history.append(cur_message.hash_value)
         self.messages.append(cur_message)
 
         # empty his current set of messages
@@ -159,7 +159,7 @@ class Agent:
             del message
         else:
             arm, reward = message.arm, message.reward
-            self.history.add(message.hash_value)
+            self.history.append(message.hash_value)
 
             self.total_visitations[arm] += 1
             self.total_rewards[arm] += reward

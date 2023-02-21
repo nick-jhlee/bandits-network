@@ -189,9 +189,10 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
 
 if __name__ == '__main__':
     num_clusters = 2  # for SBM
-    size_cluster = 50
+    size_cluster = 10
     N = size_cluster * num_clusters  # number of agents
-    er_p = 1.01 * log(N) / N
+    er_p = 2 * log(N) / N
+    # er_p = 1.01 * log(N) / N  # for large instances
 
     # create communication networks
     Networks = {}
@@ -210,7 +211,7 @@ if __name__ == '__main__':
     plot_network(Network_ER, pos_ER)
 
     ## Barabasi-Albert
-    m = 3
+    m = 5
     Network_BA = nx.barabasi_albert_graph(N, m, seed=2023)
     Network_BA.name = f"BA_{m}"
     pos_BA = nx.spring_layout(Network_BA)
@@ -218,22 +219,39 @@ if __name__ == '__main__':
     plot_network(Network_BA, pos_BA)
 
     ## Binary SBM
-    sbm_p, sbm_q = 3 * er_p, 0.001
+    sbm_p, sbm_q = 2 * er_p, 0.01
+    # sbm_p, sbm_q = 3 * er_p, 0.001    # for large instances
     Network_SBM = nx.random_partition_graph([size_cluster for _ in range(num_clusters)], sbm_p, sbm_q, seed=2023)
     Network_SBM.name = f"SBM_{sbm_p}_{sbm_q}"
     pos_SBM = nx.spring_layout(Network_SBM)
     Networks['SBM'] = (Network_SBM, pos_SBM)
     plot_network(Network_SBM, pos_SBM)
 
-    ## Barbell model
-    Network_Barbell = nx.barbell_graph(N // 2, 0)
-    Network_Barbell.name = "Barbell"
-    pos_Barbell = nx.spring_layout(Network_Barbell)
-    Networks['Barbell'] = (Network_Barbell, pos_Barbell)
-    plot_network(Network_Barbell, pos_Barbell)
+    ## Star Graph
+    Network_Star = nx.star_graph(N-1)
+    Network_Star.name = f"Star"
+    pos_Star = nx.spring_layout(Network_Star)
+    Networks['Star'] = (Network_Star, pos_Star)
+    plot_network(Network_Star, pos_Star)
 
-    T = int(1e4)  # number of iterations
-    K = 30  # total number of arms
+    ## Cycle(Ring) Graph
+    Network_Cycle = nx.cycle_graph(N)
+    Network_Cycle.name = f"Cycle"
+    pos_Cycle = nx.spring_layout(Network_Cycle)
+    Networks['Cycle'] = (Network_Cycle, pos_Cycle)
+    plot_network(Network_Cycle, pos_Cycle)
+
+    ## Path Graph
+    Network_Path = nx.path_graph(N)
+    Network_Path.name = f"Path"
+    pos_Path = nx.spring_layout(Network_Path)
+    Networks['Path'] = (Network_Path, pos_Path)
+    plot_network(Network_Path, pos_Path)
+
+
+    # T = int(1e3)  # number of iterations
+    T = int(1e4)  # number of iterations    # for path, cycle, star
+    K = 20  # total number of arms
     k = 10  # number of arms per agent
 
     # arm set and their mean rewards
@@ -262,7 +280,8 @@ if __name__ == '__main__':
         arm_sets = arm_sets['arm_sets']
 
     # experiments
-    for RG_model in ['ER', 'BA', 'SBM']:
+    for RG_model in ['Star', 'ER', 'BA', 'SBM']:
+    # for RG_model in ['Star', 'ER', 'BA', 'SBM', 'Path', 'Cycle']:
         for bandwidth in ["", "-bandwidth"]:
             print(f"{bandwidth}, {RG_model}; N={N},K={K},k={k},T={T}")
             path = f"results/heterogeneous_K={K}{bandwidth}"
