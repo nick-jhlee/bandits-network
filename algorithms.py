@@ -93,7 +93,7 @@ class Agent:
         self.total_visitations = dict.fromkeys(arm_set, 0)
 
         # hash values of messages that he has seen
-        self.history = deque(maxlen=gamma*len(Network))
+        self.history = deque()
 
     # one round of UCB_network
     def UCB_network(self):
@@ -112,13 +112,10 @@ class Agent:
                     tmp = ucb
         # finalize the set of messages to be passed along
         cur_message = self.pull(final_arm)
-        self.history.append(cur_message.hash_value)
         self.messages.append(cur_message)
 
         # empty his current set of messages
         final_messages = self.messages
-        if "interfere" in self.mp:
-            final_messages = interfere(final_messages)
         self.messages = deque()
         return final_messages
 
@@ -145,8 +142,6 @@ class Agent:
 
     def store_message(self, message):
         message.decay()
-        if "corrupt" in self.mp:
-            message.corrupt(self.mp)
         if message.gamma < 0:  # if the message is not yet expired, for MP
             del message
         else:
@@ -154,35 +149,29 @@ class Agent:
             self.messages.append(message)
 
     def receive_message(self, message):
-        # delete message if it has already been observed
-        if message.hash_value in self.history:
-            del message
-        else:
-            arm, reward = message.arm, message.reward
-            self.history.append(message.hash_value)
+        arm, reward = message.arm, message.reward
 
-            self.total_visitations[arm] += 1
-            self.total_rewards[arm] += reward
+        self.total_visitations[arm] += 1
+        self.total_rewards[arm] += reward
 
-    def receive(self, messages):
-        while messages:  # d is True if d is not empty (canonical way for all collections)
-            message = messages.pop()
-            if message is not None:
-                contain_message = message.arm in self.arm_set
-                # receive, depending on the communication protocol!
-                if "MP" in self.mp:
-                    if contain_message:
-                        self.receive_message(message)
-                        if "Hitting" in self.mp:
-                            del message
-                        else:
-                            self.store_message(message)
+    # while messages:  # d is True if d is not empty (canonical way for all collections)
+    def receive(self, message):
+        if message is not None:
+            contain_message = message.arm in self.arm_set
+            # receive, depending on the communication protocol!
+            if "Flooding" in self.mp:
+                if contain_message:
+                    self.receive_message(message)
+                    if "Absorption" in self.mp:
+                        del message
                     else:
                         self.store_message(message)
                 else:
-                    del message
+                    self.store_message(message)
             else:
                 del message
+        else:
+            del message
 
 
 def run_ucb(problem, p):
@@ -223,6 +212,8 @@ def run_ucb(problem, p):
             else:
                 neighbors = Network.adj[v]
                 # message broadcasting
+                if "interfere" in problem.mp:
+                    messages = interfere(messages)
                 while messages:
                     message = messages.pop()
                     if message is None:
@@ -230,27 +221,38 @@ def run_ucb(problem, p):
                     else:
                         # remove the previously originating agent
                         neighbors_new = [nbhd for nbhd in neighbors if nbhd != message.v_prev]
-
-                        # construct neighbors to which the message will be gossiped to (push protocol)
-                        if n_gossip is None or n_gossip >= len(neighbors_new):
-                            gossip_neighbors = neighbors_new
+                        # if the message hits a dead end, delete it
+                        if len(neighbors_new) == 0:
+                            del message
                         else:
-                            gossip_neighbors = np.random.choice(neighbors_new, size=n_gossip, replace=False)
-                        # pass messages
-                        for neighbor in gossip_neighbors:
-                            message_copy = deepcopy(message)
-                            # update communication complexity
-                            Agents[v].communication += 1
-                            # update number of messages per edge
-                            if v < neighbor:
-                                Edge_Messages[original_edges.index((v, neighbor))][t] += 1
+                            # construct neighbors to which the message will be gossiped to (push protocol)
+                            if n_gossip is None or n_gossip >= len(neighbors_new):
+                                gossip_neighbors = neighbors_new
                             else:
-                                Edge_Messages[original_edges.index((neighbor, v))][t] += 1
-                            # send messages
-                            if np.random.binomial(1, p) == 0:  # message failure
-                                Agents[neighbor].receive(deque([None]))
-                            else:
-                                Agents[neighbor].receive(deque([message_copy]))
+                                gossip_neighbors = np.random.choice(neighbors_new, size=n_gossip, replace=False)
+                            # pass messages
+                            for neighbor in gossip_neighbors:
+                                message_copy = deepcopy(message)
+                                # update communication complexity
+                                Agents[v].communication += 1
+                                # delete message if it has already been observed
+                                if message_copy.hash_value in Agents[neighbor].history:
+                                    del message_copy
+                                else:
+                                    # update hash value history
+                                    Agents[neighbor].history.append(message_copy.hash_value)
+                                    # update number of messages per edge
+                                    if v < neighbor:
+                                        Edge_Messages[original_edges.index((v, neighbor))][t] += 1
+                                    else:
+                                        Edge_Messages[original_edges.index((neighbor, v))][t] += 1
+                                    # send messages
+                                    if np.random.binomial(1, p) == 0:  # message failure
+                                        Agents[neighbor].receive(None)
+                                    else:
+                                        if "corrupt" in problem.mp:
+                                            message_copy.corrupt(problem.mp)
+                                        Agents[neighbor].receive(message_copy)
                     # delete the message sent by the originating agent, after communication is complete
                     del message
 

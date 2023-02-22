@@ -16,6 +16,7 @@ def create_problem(Network, Agents, T, N, K, param):
     for agent in Agents:
         agent.gamma = gamma
         agent.mp = mp
+        agent.history = deque(maxlen=gamma*len(Network))
 
     # create problem instance
     return Problem(Network, Agents, T, N, K, param)
@@ -51,9 +52,6 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
         print(f"Finished: {multiprocess.process.current_process()}, {param}")
 
         return result
-
-    # print(F(params[0]))
-    # raise ValueError("stop")
 
     # run the experiments in parallel
     with Pool() as pool:
@@ -280,9 +278,9 @@ if __name__ == '__main__':
         arm_sets = arm_sets['arm_sets']
 
     # experiments
-    for RG_model in ['Star', 'ER', 'BA', 'SBM']:
-    # for RG_model in ['Star', 'ER', 'BA', 'SBM', 'Path', 'Cycle']:
-        for bandwidth in ["", "-bandwidth"]:
+    for RG_model in ['ER', 'BA', 'SBM', 'Path', 'Cycle', 'Star']:
+        for bandwidth in [""]:
+        # for bandwidth in ["", "-bandwidth"]:
             print(f"{bandwidth}, {RG_model}; N={N},K={K},k={k},T={T}")
             path = f"results/heterogeneous_K={K}{bandwidth}"
             # create paths
@@ -313,7 +311,7 @@ if __name__ == '__main__':
                 plot_network(Network, pos, f"results/networks/{Network.name}_{arm}.pdf", color_map)
 
             # algorithms for comparison
-            mps, n_gossips = ["baseline", f"MP{bandwidth}", f"Hitting-MP{bandwidth}"], [None, 1]
+            mps, n_gossips = ["baseline", f"Flooding{bandwidth}", f"Flooding-Absorption{bandwidth}"], [None, 1]
 
             # Experiment #1.1 Comparing regrets (over iteration t)
             gammas = [1]
