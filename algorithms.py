@@ -148,20 +148,14 @@ class Agent:
             message.update(self.idx)  # update message.v_prev to the current agent
             self.messages.append(message)
 
-    def receive_message(self, message):
-        arm, reward = message.arm, message.reward
-
-        self.total_visitations[arm] += 1
-        self.total_rewards[arm] += reward
-
     # while messages:  # d is True if d is not empty (canonical way for all collections)
     def receive(self, message):
         if message is not None:
-            contain_message = message.arm in self.arm_set
             # receive, depending on the communication protocol!
             if "Flooding" in self.mp:
-                if contain_message:
-                    self.receive_message(message)
+                if message.arm in self.arm_set:
+                    self.total_visitations[message.arm] += 1
+                    self.total_rewards[message.arm] += message.reward
                     if "Absorption" in self.mp:
                         del message
                     else:
@@ -211,9 +205,10 @@ def run_ucb(problem, p):
                 del messages
             else:
                 neighbors = Network.adj[v]
-                # message broadcasting
+                # message intereference, if applicable
                 if "interfere" in problem.mp:
                     messages = interfere(messages)
+                # message broadcasting
                 while messages:
                     message = messages.pop()
                     if message is None:

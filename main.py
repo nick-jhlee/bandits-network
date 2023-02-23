@@ -77,19 +77,21 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
     else:
         raise ValueError("Are we fixing p or gamma?")
 
+    original_edges = list(Network.edges())
     # partial_param = (n_gossip, mp)
     def f(partial_param):
         total_regret = np.zeros((n_repeats, length))
         total_communication = np.zeros((n_repeats, length))
-        total_messages = np.zeros((len(Network.edges()), T))
+        total_messages_1 = np.zeros((n_repeats, length))
+        total_messages_2 = np.zeros((n_repeats, length))
 
         for repeat, i in product(range(n_repeats), range(length)):
             if exp_type == "vary_t":
                 idx = params.index(partial_param + (gamma, p, repeat))
                 total_regret[repeat][i] = everything[idx][0][i]
                 total_communication[repeat][i] = everything[idx][1][i]
-                if i == 0:  # update only once per update
-                    total_messages += everything[idx][2]
+                total_messages_1[repeat][i] = everything[idx][2][original_edges.index((7, 14))][i]
+                total_messages_2[repeat][i] = everything[idx][2][original_edges.index((8, 14))][i]
             else:
                 if exp_type == "vary_p":
                     idx = params.index(partial_param + (gamma, l[i], repeat))
@@ -100,7 +102,7 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
                 total_regret[repeat][i] = everything[idx][0][-1]
                 total_communication[repeat][i] = everything[idx][1][-1]
 
-        return total_regret, total_communication, total_messages / n_repeats
+        return total_regret, total_communication, total_messages_1, total_messages_2
 
     # collect datas in parallel
     partial_params = list(product(mps, n_gossips))
@@ -116,13 +118,17 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
 
     final_regrets_mean, final_regrets_std = [], []
     final_communications_mean, final_communications_std = [], []
-    final_messages_means = []
-    for total_regret, total_communication, total_messages in finals:
+    final_messages_mean_1, final_messages_std_1 = [], []
+    final_messages_mean_2, final_messages_std_2 = [], []
+    for total_regret, total_communication, total_message_1, total_message_2 in finals:
         final_regrets_mean.append(np.mean(total_regret, axis=0))
         final_regrets_std.append(np.std(total_regret, axis=0))
         final_communications_mean.append(np.mean(total_communication, axis=0))
         final_communications_std.append(np.std(total_communication, axis=0))
-        final_messages_means.append(total_messages)
+        final_messages_mean_1.append(np.mean(total_message_1, axis=0))
+        final_messages_std_1.append(np.std(total_message_1, axis=0))
+        final_messages_mean_2.append(np.mean(total_message_2, axis=0))
+        final_messages_std_2.append(np.std(total_message_2, axis=0))
 
     if exp_type == "vary_p":
         title_regret = f"Final Regret ({Network.name}, gamma={gamma})"
@@ -142,6 +148,12 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
 
         title_communication = f"Final Communication ({Network.name}, p={p}, gamma={gamma})"
         fname_communication = f"{path}/Communication_final_t_p={p}_gamma={gamma}_{Network.name}"
+
+        title_message_1 = f"# of Messages in Bottleneck Edge (7, 14) ({Network.name}, p={p}, gamma={gamma})"
+        fname_message_1 = f"{path}/Message_final_t_(7,14)_p={p}_gamma={gamma}_{Network.name}"
+
+        title_message_2 = f"# of Messages in Bottleneck Edge (8, 14) ({Network.name}, p={p}, gamma={gamma})"
+        fname_message_2 = f"{path}/Message_final_t_(8,14)_p={p}_gamma={gamma}_{Network.name}"
     else:
         raise ValueError("Are we fixing p or gamma?")
 
@@ -160,29 +172,11 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
          title_regret, x_label, legends, f"{fname_regret}.pdf")
     plot(np.array(final_communications_mean), np.array(final_communications_std), l,
          title_communication, x_label, legends, f"{fname_communication}.pdf")
-
-    # plotting number of messages passed around, per edge
-    if exp_type == "vary_t" and n_gossips == [None]:
-        original_edges = list(Network.edges())
-        for mp_idx, total_messages in enumerate(final_messages_means):
-            fig, ax = plt.subplots()
-            clrs = sns.color_palette("husl", len(original_edges))
-            xs = range(T)
-            mp = mps[mp_idx]
-
-            with sns.axes_style("darkgrid"):
-                for i, color in enumerate(clrs):
-                    ax.plot(xs, total_messages[i], label=f"{original_edges[i]}", c=color)
-                    # ax.fill_between(xs, final_means[i] - final_stds[i], final_means[i] + final_stds[i],
-                    #                 alpha=0.3, facecolor=color)
-
-                ax.set_title(f"[{mp}] Number of messages per edge (gamma={gamma}, p={p}, n_gossip=None)")
-                ax.set_xlabel("t")
-                ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-                plt.savefig(f"{path}/Messages_{mp}_p={p}_gamma={gamma}_{Network.name}.pdf", dpi=1200,
-                            bbox_inches='tight')
-                plt.close()
-                # plt.show()
+    if exp_type == "vary_t":
+        plot(np.array(final_messages_mean_1), np.array(final_messages_std_1), l,
+             title_message_1, x_label, legends, f"{fname_message_1}.pdf")
+        plot(np.array(final_messages_mean_2), np.array(final_messages_std_2), l,
+             title_message_2, x_label, legends, f"{fname_message_2}.pdf")
 
 
 if __name__ == '__main__':
