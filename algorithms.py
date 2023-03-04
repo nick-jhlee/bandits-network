@@ -299,9 +299,12 @@ def non_blocking_power(Network, arm_sets, gamma, a):
                     if len(path) == 1:
                         raise ValueError
                     else:
+                        tmp = True
                         for u in path[1:-1]:
                             if a in arm_sets[u]:
-                                raise ValueError
+                                tmp = False
+                        if tmp:
+                            raise ValueError
             except:
                 Network_result.add_edge(v, w)
     return Network_result
