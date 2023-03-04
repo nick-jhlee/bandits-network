@@ -1,5 +1,6 @@
 import numpy as np
-import networkx as nx
+# import networkx as nx
+import grinpy as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -26,36 +27,46 @@ def plot(Regrets, Group_Regrets, Network, titles, fnames):
 
 
 # source: https://stackoverflow.com/questions/43064524/plotting-shaded-uncertainty-region-in-line-plot-in-matplotlib-when-data-has-nans
-def plot_final(final_means, final_stds, xs, title, xlabel, legends, fname):
+def plot_final(final_means, final_stds, xs, title, xlabel, fname, legends=None):
     fig, ax = plt.subplots()
-    clrs = sns.color_palette("husl", len(legends))
+    clrs = sns.color_palette("husl", len(final_means))
+    legend_available = legends is not None and len(legends) > 0
 
-    with sns.axes_style("darkgrid"):
+    with sns.axes_style("whitegrid"):
         for i, color in enumerate(clrs):
-            ax.plot(xs, final_means[i], label=legends[i], c=color)
+            if legend_available:
+                ax.plot(xs, final_means[i], label=legends[i], c=color)
+            else:
+                ax.plot(xs, final_means[i], c=color)
             ax.fill_between(xs, final_means[i] - final_stds[i], final_means[i] + final_stds[i],
                             alpha=0.3, facecolor=color)
 
     ax.set_title(title)
     ax.set_xlabel(xlabel)
-    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    if legend_available:
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     plt.savefig(fname, dpi=1200, bbox_inches='tight')
     plt.close()
     # plt.show()
 
 
-def plot_final_discrete(final_means, final_stds, xs, title, xlabel, legends, fname):
+def plot_final_discrete(final_means, final_stds, xs, title, xlabel, fname, legends=None):
     fig, ax = plt.subplots()
-    clrs = sns.color_palette("husl", len(legends))
+    clrs = sns.color_palette("husl", len(final_means))
+    legend_available = legends is not None and len(legends) > 0
 
     with sns.axes_style("darkgrid"):
         for i, color in enumerate(clrs):
-            ax.errorbar(xs, final_means[i], yerr=final_stds[i], fmt='o', linestyle='dashed', capsize=3,
-                        label=legends[i], c=color)
+            if legend_available:
+                ax.errorbar(xs, final_means[i], yerr=final_stds[i], fmt='o', linestyle='dashed', capsize=3,
+                            label=legends[i], c=color)
+            else:
+                ax.errorbar(xs, final_means[i], yerr=final_stds[i], fmt='o', linestyle='dashed', capsize=3, c=color)
 
     ax.set_title(title)
     ax.set_xlabel(xlabel)
-    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    if legend_available:
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     plt.savefig(fname, dpi=1200, bbox_inches='tight')
     plt.close()
     # plt.show()

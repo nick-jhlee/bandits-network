@@ -1,6 +1,4 @@
 from algorithms import *
-import multiprocess
-from multiprocess import Pool
 import networkx as nx
 from math import log
 
@@ -16,7 +14,7 @@ def create_problem(Network, Agents, T, N, K, param):
     for agent in Agents:
         agent.gamma = gamma
         agent.mp = mp
-        agent.history = deque(maxlen=gamma*len(Network))
+        agent.history = deque(maxlen=gamma * len(Network))
 
     # create problem instance
     return Problem(Network, Agents, T, N, K, param)
@@ -37,7 +35,7 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
     # run experiment only once for baseline
     params = [item for item in params if item[0] != "baseline" or (item[0] == "baseline" and item[1] is None)]
     # remove Hitting+Gossiping
-    params = [item for item in params if "Hitting" not in item[0] or item[1] is None]
+    params = [item for item in params if "Absorption" not in item[0] or item[1] is None]
 
     def F(param):
         # reseeding!
@@ -78,6 +76,7 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
         raise ValueError("Are we fixing p or gamma?")
 
     original_edges = list(Network.edges())
+
     # partial_param = (n_gossip, mp)
     def f(partial_param):
         total_regret = np.zeros((n_repeats, length))
@@ -90,8 +89,15 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
                 idx = params.index(partial_param + (gamma, p, repeat))
                 total_regret[repeat][i] = everything[idx][0][i]
                 total_communication[repeat][i] = everything[idx][1][i]
-                total_messages_1[repeat][i] = everything[idx][2][original_edges.index((7, 14))][i]
-                total_messages_2[repeat][i] = everything[idx][2][original_edges.index((8, 14))][i]
+                if 'SBM' in Network.name:
+                    if N == 20:
+                        total_messages_1[repeat][i] = everything[idx][2][original_edges.index((7, 14))][i]
+                        total_messages_2[repeat][i] = everything[idx][2][original_edges.index((8, 14))][i]
+                    elif N == 100:
+                        total_messages_1[repeat][i] = everything[idx][2][original_edges.index((1, 74))][i]
+                        total_messages_2[repeat][i] = everything[idx][2][original_edges.index((37, 70))][i]
+                    else:
+                        raise NotImplementedError
             else:
                 if exp_type == "vary_p":
                     idx = params.index(partial_param + (gamma, l[i], repeat))
@@ -110,7 +116,7 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
     partial_params = [item for item in partial_params if
                       item[0] != "baseline" or (item[0] == "baseline" and item[1] is None)]
     # remove Hitting+Gossiping
-    partial_params = [item for item in partial_params if "Hitting" not in item[0] or item[1] is None]
+    partial_params = [item for item in partial_params if "Absorption" not in item[0] or item[1] is None]
 
     with Pool() as pool:
         finals = pool.map_async(f, partial_params)
@@ -125,10 +131,11 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
         final_regrets_std.append(np.std(total_regret, axis=0))
         final_communications_mean.append(np.mean(total_communication, axis=0))
         final_communications_std.append(np.std(total_communication, axis=0))
-        final_messages_mean_1.append(np.mean(total_message_1, axis=0))
-        final_messages_std_1.append(np.std(total_message_1, axis=0))
-        final_messages_mean_2.append(np.mean(total_message_2, axis=0))
-        final_messages_std_2.append(np.std(total_message_2, axis=0))
+        if 'SBM' in Network.name:
+            final_messages_mean_1.append(np.mean(total_message_1, axis=0))
+            final_messages_std_1.append(np.std(total_message_1, axis=0))
+            final_messages_mean_2.append(np.mean(total_message_2, axis=0))
+            final_messages_std_2.append(np.std(total_message_2, axis=0))
 
     if exp_type == "vary_p":
         title_regret = f"Final Regret ({Network.name}, gamma={gamma})"
@@ -149,11 +156,12 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
         title_communication = f"Final Communication ({Network.name}, p={p}, gamma={gamma})"
         fname_communication = f"{path}/Communication_final_t_p={p}_gamma={gamma}_{Network.name}"
 
-        title_message_1 = f"# of Messages in Bottleneck Edge (7, 14) ({Network.name}, p={p}, gamma={gamma})"
-        fname_message_1 = f"{path}/Message_final_t_(7,14)_p={p}_gamma={gamma}_{Network.name}"
+        if 'SBM' in Network.name:
+            title_message_1 = f"# of Messages in Bottleneck Edge (7, 14) ({Network.name}, p={p}, gamma={gamma})"
+            fname_message_1 = f"{path}/Message_final_t_(7,14)_p={p}_gamma={gamma}_{Network.name}"
 
-        title_message_2 = f"# of Messages in Bottleneck Edge (8, 14) ({Network.name}, p={p}, gamma={gamma})"
-        fname_message_2 = f"{path}/Message_final_t_(8,14)_p={p}_gamma={gamma}_{Network.name}"
+            title_message_2 = f"# of Messages in Bottleneck Edge (8, 14) ({Network.name}, p={p}, gamma={gamma})"
+            fname_message_2 = f"{path}/Message_final_t_(8,14)_p={p}_gamma={gamma}_{Network.name}"
     else:
         raise ValueError("Are we fixing p or gamma?")
 
@@ -169,22 +177,23 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
         plot = plot_final
 
     plot(np.array(final_regrets_mean), np.array(final_regrets_std), l,
-         title_regret, x_label, legends, f"{fname_regret}.pdf")
+         title_regret, x_label, f"{fname_regret}.pdf", legends)
     plot(np.array(final_communications_mean), np.array(final_communications_std), l,
-         title_communication, x_label, legends, f"{fname_communication}.pdf")
-    if exp_type == "vary_t":
+         title_communication, x_label, f"{fname_communication}.pdf", legends)
+    if exp_type == "vary_t" and 'SBM' in Network.name:
         plot(np.array(final_messages_mean_1), np.array(final_messages_std_1), l,
-             title_message_1, x_label, legends, f"{fname_message_1}.pdf")
+             title_message_1, x_label, f"{fname_message_1}.pdf", legends)
         plot(np.array(final_messages_mean_2), np.array(final_messages_std_2), l,
-             title_message_2, x_label, legends, f"{fname_message_2}.pdf")
+             title_message_2, x_label, f"{fname_message_2}.pdf", legends)
 
 
 if __name__ == '__main__':
     num_clusters = 2  # for SBM
+    # size_cluster = 50
     size_cluster = 10
     N = size_cluster * num_clusters  # number of agents
     er_p = 2 * log(N) / N
-    # er_p = 1.01 * log(N) / N  # for large instances
+    # er_p = 1.001 * log(N) / N  # for large instances
 
     # create communication networks
     Networks = {}
@@ -202,8 +211,9 @@ if __name__ == '__main__':
     Networks['ER'] = (Network_ER, pos_ER)
     plot_network(Network_ER, pos_ER)
 
-    ## Barabasi-Albert
-    m = 5
+    # Barabasi-Albert
+    m = 5   # for small instances
+    # m = 3
     Network_BA = nx.barabasi_albert_graph(N, m, seed=2023)
     Network_BA.name = f"BA_{m}"
     pos_BA = nx.spring_layout(Network_BA)
@@ -212,15 +222,18 @@ if __name__ == '__main__':
 
     ## Binary SBM
     sbm_p, sbm_q = 2 * er_p, 0.01
-    # sbm_p, sbm_q = 3 * er_p, 0.001    # for large instances
-    Network_SBM = nx.random_partition_graph([size_cluster for _ in range(num_clusters)], sbm_p, sbm_q, seed=2023)
+    # sbm_p, sbm_q = 2 * er_p, 0.001  # for large instances
+    u = 2023
+    while not nx.is_connected(nx.random_partition_graph([size_cluster for _ in range(num_clusters)], sbm_p, sbm_q, seed=u)):
+        u += 1
+    Network_SBM = nx.random_partition_graph([size_cluster for _ in range(num_clusters)], sbm_p, sbm_q, seed=u)
     Network_SBM.name = f"SBM_{sbm_p}_{sbm_q}"
     pos_SBM = nx.spring_layout(Network_SBM)
     Networks['SBM'] = (Network_SBM, pos_SBM)
     plot_network(Network_SBM, pos_SBM)
 
     ## Star Graph
-    Network_Star = nx.star_graph(N-1)
+    Network_Star = nx.star_graph(N - 1)
     Network_Star.name = f"Star"
     pos_Star = nx.spring_layout(Network_Star)
     Networks['Star'] = (Network_Star, pos_Star)
@@ -240,11 +253,11 @@ if __name__ == '__main__':
     Networks['Path'] = (Network_Path, pos_Path)
     plot_network(Network_Path, pos_Path)
 
-
-    # T = int(1e3)  # number of iterations
-    T = int(1e4)  # number of iterations    # for path, cycle, star
+    T = int(1e4)  # number of iterations
     K = 20  # total number of arms
     k = 10  # number of arms per agent
+    # K = 40  # total number of arms (for larger instances)
+    # k = 20  # number of arms per agent (for larger instances)
 
     # arm set and their mean rewards
     if not os.path.exists("results/means.npz"):
@@ -273,8 +286,8 @@ if __name__ == '__main__':
 
     # experiments
     for RG_model in ['ER', 'BA', 'SBM', 'Path', 'Cycle', 'Star']:
-        for bandwidth in [""]:
         # for bandwidth in ["", "-bandwidth"]:
+        for bandwidth in [""]:
             print(f"{bandwidth}, {RG_model}; N={N},K={K},k={k},T={T}")
             path = f"results/heterogeneous_K={K}{bandwidth}"
             # create paths
@@ -318,20 +331,28 @@ if __name__ == '__main__':
             main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
             plt.clf()
 
-            gammas = [3]
+            # Experiment #1.2 Effect of gamma, under perfect communication
+            gammas = [1, 2, 3, 4]  # max number of rounds for message passing
             ps = [1.0]
             main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
             plt.clf()
 
-            # Experiment #1.2 Effect of varying p
+            # Experiment #1.3 Effect of varying p
             # p: probability that a message is *not* lost
             ps = list(np.linspace(0, 1.0, num=21))
             gammas = [2]  # number of rounds for message passing
             main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
             plt.clf()
 
-            # Experiment #1.3 Effect of gamma, under perfect communication
-            gammas = [1, 2, 3, 4]  # max number of rounds for message passing
+            # Experiment #1.3.1 Effect of varying p for IRS
+            # p: probability that a message is *not* lost
+            ps = list(np.linspace(0, 1.0, num=21))
+            main_parallel(Network, Agents, T, N, K, [f"Flooding{bandwidth}"], [None], [1], ps, 10,
+                          path + f"/{RG_model}")
+            plt.clf()
+
+            # Experiment #1.1.1
+            gammas = [3]
             ps = [1.0]
             main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
             plt.clf()

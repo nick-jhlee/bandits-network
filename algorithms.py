@@ -4,7 +4,10 @@ from scipy.stats import cauchy, levy
 from math import inf
 
 from tqdm import tqdm
+import multiprocess
+from multiprocess import Pool
 from copy import deepcopy
+from itertools import combinations
 
 
 class Problem:
@@ -148,7 +151,6 @@ class Agent:
             message.update(self.idx)  # update message.v_prev to the current agent
             self.messages.append(message)
 
-    # while messages:  # d is True if d is not empty (canonical way for all collections)
     def receive(self, message):
         if message is not None:
             # receive, depending on the communication protocol!
@@ -192,10 +194,28 @@ def run_ucb(problem, p):
         # Network_modified.remove_edges_from(failed_edges)
 
         total_messages = [[None] for _ in range(N)]
+
         # single iteration of UCB, for each agent!
         for v in range(N):
             total_messages[v] = Agents[v].UCB_network()
             Regrets[v][t] = Agents[v].regret
+
+        ## TODO: implement parallel loop here using ThreadPool!
+        ## cf. https://superfastpython.com/parallel-nested-for-loops-in-python
+        # def U(v):
+        #     messages_v = Agents[v].UCB_network()
+        #     regrets_v = Agents[v].regret
+        #     return messages_v, regrets_v
+        #
+        # # run the experiments in parallel
+        # with Pool() as pool:
+        #     everything = pool.map_async(U, range(N))
+        #     everything = everything.get()
+        #
+        # for v, (messages_v, regrets_v) in enumerate(everything):
+        #     total_messages[v] = messages_v
+        #     for t, regret in enumerate(regrets_v):
+        #         Regrets[v][t] = regret
 
         # information sharing(dissemination)
         for v in range(N):
@@ -268,3 +288,47 @@ def interfere(messages):
             # messages.remove(message)
             return deque([None])
     return messages
+
+
+def non_blocking_power(Network, arm_sets, gamma, a):
+    Network_result = deepcopy(Network)
+    for v, w in combinations(Network.nodes, 2):
+        if nx.has_path(Network, v, w):
+            for path in nx.all_simple_paths(Network, v, w, gamma):
+                if len(path) == 1:
+                    break
+                else:
+                    for u in path[1:-1]:
+                        if a in arm_sets[u]:
+                            Network_result.add_edge(v, w)
+    return Network_result
+
+
+def compute_constants(Network, arm_sets, reward_avgs, K, gamma):
+    # Compute Delta's (tilde{Delta] as in Yang et al., INFOCOM 2022)
+    Deltas = []
+    for a in range(K):
+        Delta = inf
+        for v in Network.nodes:
+            arm_set = arm_sets[v]
+            if a in arm_set:
+                delta = max(reward_avgs[arm_set]) - reward_avgs[a]
+                if Delta > delta > 0:
+                    Delta = delta
+        if Delta == inf:
+            Delta = 0
+        Deltas.append(Delta)
+
+    # Compute theta([G^gamma]_a)
+    Thetas, Thetas_FWA = [], []
+    Network_gamma = nx.power(Network, gamma)
+    for a in range(K):
+        Agents_a = [v for v in Network.nodes if a in arm_sets[v]]
+        Network_gamma_a = Network_gamma.subgraph(Agents_a)
+        Thetas.append(
+            nx.chromatic_number(nx.complement(Network_gamma_a)))  # theta(G) = chromatic_number(complement of G)
+
+        Network_gamma_a_nonblocking = non_blocking_power(Network, arm_sets, gamma, a)
+        Thetas_FWA.append(nx.chromatic_number(nx.complement(Network_gamma_a_nonblocking)))
+
+    return list(zip(Deltas, Thetas, Thetas_FWA))
