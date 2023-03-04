@@ -294,13 +294,16 @@ def non_blocking_power(Network, arm_sets, gamma, a):
     Network_result = deepcopy(Network)
     for v, w in combinations(Network.nodes, 2):
         if nx.has_path(Network, v, w):
-            for path in nx.all_simple_paths(Network, v, w, gamma):
-                if len(path) == 1:
-                    break
-                else:
-                    for u in path[1:-1]:
-                        if a in arm_sets[u]:
-                            Network_result.add_edge(v, w)
+            try:
+                for path in nx.all_simple_paths(Network, v, w, gamma):
+                    if len(path) == 1:
+                        raise ValueError
+                    else:
+                        for u in path[1:-1]:
+                            if a in arm_sets[u]:
+                                raise ValueError
+            except:
+                Network_result.add_edge(v, w)
     return Network_result
 
 
