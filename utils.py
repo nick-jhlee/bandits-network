@@ -46,8 +46,8 @@ def plot_final(final_means, final_stds, xs, title, xlabel, fname, legends=None):
     if legend_available:
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     plt.savefig(fname, dpi=1200, bbox_inches='tight')
-    plt.close()
     # plt.show()
+    plt.close()
 
 
 def plot_final_discrete(final_means, final_stds, xs, title, xlabel, fname, legends=None):

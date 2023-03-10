@@ -6,7 +6,7 @@ from itertools import product
 import os
 
 
-def create_problem(Network, Agents, T, N, K, param):
+def create_problem(Network, Agents, T, N, K, param, naive_p):
     # param: (mp, n_gossip, gamma, p, n_repeat)
     mp, _, gamma, _, _ = param
 
@@ -17,10 +17,10 @@ def create_problem(Network, Agents, T, N, K, param):
         agent.history = deque(maxlen=gamma * len(Network))
 
     # create problem instance
-    return Problem(Network, Agents, T, N, K, param)
+    return Problem(Network, Agents, T, N, K, param, naive_p)
 
 
-def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repeats, path):
+def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repeats, path, naive_p):
     if len(gammas) == 1 and len(ps) > 1:
         exp_type = "vary_p"
     elif len(ps) == 1 and len(gammas) > 1:
@@ -43,7 +43,7 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
 
         # create problem instance
         Agents = deepcopy(Agents_)
-        problem = create_problem(Network, Agents, T, N, K, param)
+        problem = create_problem(Network, Agents, T, N, K, param, naive_p)
         result = run_ucb(problem, param[-2])
 
         # print process id
@@ -285,7 +285,8 @@ if __name__ == '__main__':
         arm_sets = arm_sets['arm_sets']
 
     # experiments
-    for RG_model in ['ER', 'BA', 'SBM', 'Path', 'Cycle', 'Star']:
+    for RG_model in ['ER', 'BA', 'SBM']:
+    # for RG_model in ['ER', 'BA', 'SBM', 'Path', 'Cycle', 'Star']:
         # for bandwidth in ["", "-bandwidth"]:
         for bandwidth in [""]:
             print(f"{bandwidth}, {RG_model}; N={N},K={K},k={k},T={T}")
@@ -328,7 +329,8 @@ if __name__ == '__main__':
 
             gammas = [2]
             ps = [1.0]
-            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+            naive_p = 0.2
+            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}_naive", naive_p)
             plt.clf()
 
             # Experiment #1.2 Effect of gamma, under perfect communication

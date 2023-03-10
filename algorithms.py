@@ -11,7 +11,7 @@ from itertools import combinations
 
 
 class Problem:
-    def __init__(self, Network, Agents, T, N, K, param):
+    def __init__(self, Network, Agents, T, N, K, param, naive_p):
         # param: (mp, n_gossip, gamma, p, n_repeat)
         mp, n_gossip, gamma, p, n_repeat = param
 
@@ -25,6 +25,8 @@ class Problem:
         self.gamma = gamma
         self.p = p  # communication probability (1 - link failure)
         self.n_repeat = n_repeat
+
+        self.naive_p = naive_p
 
     def __str__(self):
         return f"{self.mp}, n_gossip={self.n_gossip}"
@@ -229,47 +231,51 @@ def run_ucb(problem, p):
                 if "interfere" in problem.mp:
                     messages = interfere(messages)
                 # message broadcasting
-                while messages:
-                    message = messages.pop()
-                    if message is None:
-                        del message
-                    else:
-                        # remove the previously originating agent
-                        neighbors_new = [nbhd for nbhd in neighbors if nbhd != message.v_prev]
-                        # if the message hits a dead end, delete it
-                        if len(neighbors_new) == 0:
+                # naive_p: random stopping probability
+                if "naive" in problem.mp and np.random.binomial(1, problem.naive_p) == 1:
+                    del messages
+                else:
+                    while messages:
+                        message = messages.pop()
+                        if message is None:
                             del message
                         else:
-                            # construct neighbors to which the message will be gossiped to (push protocol)
-                            if n_gossip is None or n_gossip >= len(neighbors_new):
-                                gossip_neighbors = neighbors_new
+                            # remove the previously originating agent
+                            neighbors_new = [nbhd for nbhd in neighbors if nbhd != message.v_prev]
+                            # if the message hits a dead end, delete it
+                            if len(neighbors_new) == 0:
+                                del message
                             else:
-                                gossip_neighbors = np.random.choice(neighbors_new, size=n_gossip, replace=False)
-                            # pass messages
-                            for neighbor in gossip_neighbors:
-                                message_copy = deepcopy(message)
-                                # update communication complexity
-                                Agents[v].communication += 1
-                                # delete message if it has already been observed
-                                if message_copy.hash_value in Agents[neighbor].history:
-                                    del message_copy
+                                # construct neighbors to which the message will be gossiped to (push protocol)
+                                if n_gossip is None or n_gossip >= len(neighbors_new):
+                                    gossip_neighbors = neighbors_new
                                 else:
-                                    # update hash value history
-                                    Agents[neighbor].history.append(message_copy.hash_value)
-                                    # update number of messages per edge
-                                    if v < neighbor:
-                                        Edge_Messages[original_edges.index((v, neighbor))][t] += 1
+                                    gossip_neighbors = np.random.choice(neighbors_new, size=n_gossip, replace=False)
+                                # pass messages
+                                for neighbor in gossip_neighbors:
+                                    message_copy = deepcopy(message)
+                                    # update communication complexity
+                                    Agents[v].communication += 1
+                                    # delete message if it has already been observed
+                                    if message_copy.hash_value in Agents[neighbor].history:
+                                        del message_copy
                                     else:
-                                        Edge_Messages[original_edges.index((neighbor, v))][t] += 1
-                                    # send messages
-                                    if np.random.binomial(1, p) == 0:  # message failure
-                                        Agents[neighbor].receive(None)
-                                    else:
-                                        if "corrupt" in problem.mp:
-                                            message_copy.corrupt(problem.mp)
-                                        Agents[neighbor].receive(message_copy)
-                    # delete the message sent by the originating agent, after communication is complete
-                    del message
+                                        # update hash value history
+                                        Agents[neighbor].history.append(message_copy.hash_value)
+                                        # update number of messages per edge
+                                        if v < neighbor:
+                                            Edge_Messages[original_edges.index((v, neighbor))][t] += 1
+                                        else:
+                                            Edge_Messages[original_edges.index((neighbor, v))][t] += 1
+                                        # send messages
+                                        if np.random.binomial(1, p) == 0:  # message failure
+                                            Agents[neighbor].receive(None)
+                                        else:
+                                            if "corrupt" in problem.mp:
+                                                message_copy.corrupt(problem.mp)
+                                            Agents[neighbor].receive(message_copy)
+                        # delete the message sent by the originating agent, after communication is complete
+                        del message
 
             Communications[v][t] = Agents[v].communication
 
@@ -293,7 +299,7 @@ def interfere(messages):
 def non_blocking_power(Network, arm_sets, gamma, a):
     Network_result = deepcopy(Network)
     for v, w in combinations(Network.nodes, 2):
-        if nx.has_path(Network, v, w):
+        if nx.has_path(Network, v, w) or nx.has_path(Network, w, v):
             try:
                 for path in nx.all_simple_paths(Network, v, w, gamma):
                     if len(path) == 1:
@@ -310,8 +316,8 @@ def non_blocking_power(Network, arm_sets, gamma, a):
     return Network_result
 
 
-def compute_constants(Network, arm_sets, reward_avgs, K, gamma):
-    # Compute Delta's (tilde{Delta] as in Yang et al., INFOCOM 2022)
+def compute_invariants(Network, arm_sets, reward_avgs, K, gamma):
+    # tilde{Delta]_a^v as in Yang et al., INFOCOM 2022
     Deltas = []
     for a in range(K):
         Delta = inf
@@ -325,16 +331,22 @@ def compute_constants(Network, arm_sets, reward_avgs, K, gamma):
             Delta = 0
         Deltas.append(Delta)
 
-    # Compute theta([G^gamma]_a)
+    # Compute theta([G^gamma]_{-a})
     Thetas, Thetas_FWA = [], []
     Network_gamma = nx.power(Network, gamma)
+    output = 0
     for a in range(K):
-        Agents_a = [v for v in Network.nodes if a in arm_sets[v]]
+        Agents_a = [v for v in Network.nodes if a in arm_sets[v] and max(reward_avgs[arm_sets[v]]) - reward_avgs[a] > 0]
+
         Network_gamma_a = Network_gamma.subgraph(Agents_a)
-        Thetas.append(
-            nx.chromatic_number(nx.complement(Network_gamma_a)))  # theta(G) = chromatic_number(complement of G)
+        theta = nx.chromatic_number(nx.complement(Network_gamma_a))  # theta(G) = chromatic_number(complement of G)
+        Thetas.append(theta)
 
         Network_gamma_a_nonblocking = non_blocking_power(Network, arm_sets, gamma, a)
-        Thetas_FWA.append(nx.chromatic_number(nx.complement(Network_gamma_a_nonblocking)))
+        Network_gamma_a_nonblocking = Network_gamma_a_nonblocking.subgraph(Agents_a)
+        theta_FWA = nx.chromatic_number(nx.complement(Network_gamma_a_nonblocking))
+        Thetas_FWA.append(theta_FWA)
 
-    return list(zip(Deltas, Thetas, Thetas_FWA))
+        output += int(Deltas[a] > 0) * (theta_FWA - theta)
+
+    return list(zip(Deltas, Thetas, Thetas_FWA)), output
