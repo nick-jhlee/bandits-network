@@ -1,4 +1,5 @@
 from utils import *
+import re
 from collections import deque
 from scipy.stats import cauchy, levy
 from math import inf
@@ -11,7 +12,7 @@ from itertools import combinations
 
 
 class Problem:
-    def __init__(self, Network, Agents, T, N, K, param, naive_p):
+    def __init__(self, Network, Agents, T, N, K, param):
         # param: (mp, n_gossip, gamma, p, n_repeat)
         mp, n_gossip, gamma, p, n_repeat = param
 
@@ -25,8 +26,6 @@ class Problem:
         self.gamma = gamma
         self.p = p  # communication probability (1 - link failure)
         self.n_repeat = n_repeat
-
-        self.naive_p = naive_p
 
     def __str__(self):
         return f"{self.mp}, n_gossip={self.n_gossip}"
@@ -142,8 +141,16 @@ class Agent:
         # next time step
         self.t += 1
 
+        # poisson clock for message expiration, for testing random stop time.
+        if "Poisson" in self.mp:
+            new_gamma = np.random.poisson(self.gamma)
+        else:
+            new_gamma = self.gamma
         # message to be sent to his neighbors
-        return Message(arm, reward, hash((self.idx, arm, reward)), self.idx, self.gamma - 1)
+        if new_gamma - 1 >= 0:
+            return Message(arm, reward, hash((self.idx, arm, reward)), self.idx, new_gamma - 1)
+        else:
+            return None
 
     def store_message(self, message):
         message.decay()
@@ -162,6 +169,15 @@ class Agent:
                     self.total_rewards[message.arm] += message.reward
                     if "Absorption" in self.mp:
                         del message
+                    # RS_p: random stopping probability
+                    # if it's randomly stopped, then delete the message
+                    elif "RandomStop" in self.mp:
+                        # if "RandomStop" in problem.mp and np.random.binomial(1, problem.RS_p) == 1:
+                        RS_p = float(re.findall(r"[\d\.\d]+", self.mp)[0])
+                        if np.random.binomial(1, RS_p) == 1:
+                            del message
+                        else:
+                            self.store_message(message)
                     else:
                         self.store_message(message)
                 else:
@@ -219,6 +235,10 @@ def run_ucb(problem, p):
         #     for t, regret in enumerate(regrets_v):
         #         Regrets[v][t] = regret
 
+        # failure of entire packet of messages, for each link
+        linkfailures = {edge: np.random.binomial(1, p) for edge in original_edges}
+        linkfailures.update({(edge[1], edge[0]): linkfailures[edge] for edge in original_edges})
+
         # information sharing(dissemination)
         for v in range(N):
             messages = total_messages[v]
@@ -230,35 +250,36 @@ def run_ucb(problem, p):
                 # message intereference, if applicable
                 if "interfere" in problem.mp:
                     messages = interfere(messages)
+
                 # message broadcasting
-                # naive_p: random stopping probability
-                if "naive" in problem.mp and np.random.binomial(1, problem.naive_p) == 1:
-                    del messages
-                else:
-                    while messages:
-                        message = messages.pop()
-                        if message is None:
+                while messages:
+                    message = messages.pop()
+                    if message is None:
+                        del message
+                    else:
+                        # remove the previously originating agent
+                        neighbors_new = [nbhd for nbhd in neighbors if nbhd != message.v_prev]
+                        # if the message hits a dead end, delete it
+                        if len(neighbors_new) == 0:
                             del message
                         else:
-                            # remove the previously originating agent
-                            neighbors_new = [nbhd for nbhd in neighbors if nbhd != message.v_prev]
-                            # if the message hits a dead end, delete it
-                            if len(neighbors_new) == 0:
-                                del message
+                            # construct neighbors to which the message will be gossiped to (push protocol)
+                            if n_gossip is None or n_gossip >= len(neighbors_new):
+                                gossip_neighbors = neighbors_new
                             else:
-                                # construct neighbors to which the message will be gossiped to (push protocol)
-                                if n_gossip is None or n_gossip >= len(neighbors_new):
-                                    gossip_neighbors = neighbors_new
+                                gossip_neighbors = np.random.choice(neighbors_new, size=n_gossip, replace=False)
+                            # pass messages
+                            for neighbor in gossip_neighbors:
+                                message_copy = deepcopy(message)
+                                # update communication complexity
+                                Agents[v].communication += 1
+                                # delete message if it has already been observed
+                                if message_copy.hash_value in Agents[neighbor].history:
+                                    del message_copy
                                 else:
-                                    gossip_neighbors = np.random.choice(neighbors_new, size=n_gossip, replace=False)
-                                # pass messages
-                                for neighbor in gossip_neighbors:
-                                    message_copy = deepcopy(message)
-                                    # update communication complexity
-                                    Agents[v].communication += 1
-                                    # delete message if it has already been observed
-                                    if message_copy.hash_value in Agents[neighbor].history:
-                                        del message_copy
+                                    # send messages
+                                    if linkfailures[(v, neighbor)] == 0:  # failure of entire packet of messages
+                                        Agents[neighbor].receive(None)
                                     else:
                                         # update hash value history
                                         Agents[neighbor].history.append(message_copy.hash_value)
@@ -267,15 +288,11 @@ def run_ucb(problem, p):
                                             Edge_Messages[original_edges.index((v, neighbor))][t] += 1
                                         else:
                                             Edge_Messages[original_edges.index((neighbor, v))][t] += 1
-                                        # send messages
-                                        if np.random.binomial(1, p) == 0:  # message failure
-                                            Agents[neighbor].receive(None)
-                                        else:
-                                            if "corrupt" in problem.mp:
-                                                message_copy.corrupt(problem.mp)
-                                            Agents[neighbor].receive(message_copy)
-                        # delete the message sent by the originating agent, after communication is complete
-                        del message
+                                        if "corrupt" in problem.mp:
+                                            message_copy.corrupt(problem.mp)
+                                        Agents[neighbor].receive(message_copy)
+                            # delete the message sent by the originating agent, after communication is complete
+                            del message
 
             Communications[v][t] = Agents[v].communication
 

@@ -1,12 +1,13 @@
 from algorithms import *
 import networkx as nx
+import random
 from math import log
 
-from itertools import product
-import os
+from itertools import product, chain
+import os, json
 
 
-def create_problem(Network, Agents, T, N, K, param, naive_p):
+def create_problem(Network, Agents, T, N, K, param):
     # param: (mp, n_gossip, gamma, p, n_repeat)
     mp, _, gamma, _, _ = param
 
@@ -17,10 +18,31 @@ def create_problem(Network, Agents, T, N, K, param, naive_p):
         agent.history = deque(maxlen=gamma * len(Network))
 
     # create problem instance
-    return Problem(Network, Agents, T, N, K, param, naive_p)
+    return Problem(Network, Agents, T, N, K, param)
+
+# mode: "uniform" or "nonuniform"
+def create_arm_sets(Network, K, k, mode):
+    N = Network.number_of_nodes()
+    # prob distribution w.r.t. which the agents to be assigned the globally optimal arm K - 1
+    ps = [Network.degree(v) / (2 * Network.number_of_edges()) for v in range(N)]
+    while True:
+        arm_sets = [random.sample(range(K), k) for _ in range(N)]  # uniformly random
+        if mode != "uniform":   # nonuniformly random
+            # make sure that the globally optimal arm K - 1 is in every arm set, initially
+            for arm_set in arm_sets:
+                if K - 1 not in arm_set:
+                    arm_set.append(K - 1)
+            # remove K - 1 from agents w.p. (roughly) proportional to the degree
+            remove_agents = np.random.choice(range(N), int(N / 3), replace=False, p=ps)
+            for v in remove_agents:
+                arm_sets[v].remove(K - 1)
+        # check if all arms are covered
+        if set(range(K)) == set(chain.from_iterable(arm_sets)):
+            break
+    return arm_sets
 
 
-def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repeats, path, naive_p):
+def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repeats, path):
     if len(gammas) == 1 and len(ps) > 1:
         exp_type = "vary_p"
     elif len(ps) == 1 and len(gammas) > 1:
@@ -43,7 +65,7 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
 
         # create problem instance
         Agents = deepcopy(Agents_)
-        problem = create_problem(Network, Agents, T, N, K, param, naive_p)
+        problem = create_problem(Network, Agents, T, N, K, param)
         result = run_ucb(problem, param[-2])
 
         # print process id
@@ -189,16 +211,16 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
 
 if __name__ == '__main__':
     num_clusters = 2  # for SBM
-    # size_cluster = 50
-    size_cluster = 10
+    size_cluster = 25
+    # size_cluster = 10
     N = size_cluster * num_clusters  # number of agents
-    er_p = 2 * log(N) / N
-    # er_p = 1.001 * log(N) / N  # for large instances
+    # er_p = 2 * log(N) / N
+    er_p = 1.001 * log(N) / N  # for large instances
 
     # create communication networks
     Networks = {}
-    if not os.path.exists("results/networks"):
-        os.makedirs("results/networks")
+    if not os.path.exists("networks"):
+        os.makedirs("networks")
 
     ## Erodos-Renyi
     # if the graph is disconnected, keep trying other seeds until the graph is connected.
@@ -209,103 +231,109 @@ if __name__ == '__main__':
     Network_ER.name = f"ER_{er_p}"
     pos_ER = nx.spring_layout(Network_ER)
     Networks['ER'] = (Network_ER, pos_ER)
-    plot_network(Network_ER, pos_ER)
+    plot_network(Network_ER, pos_ER, parent="networks")
 
     # Barabasi-Albert
-    m = 5   # for small instances
-    # m = 3
+    # m = 5  # for small instances
+    m = 3
     Network_BA = nx.barabasi_albert_graph(N, m, seed=2023)
     Network_BA.name = f"BA_{m}"
     pos_BA = nx.spring_layout(Network_BA)
     Networks['BA'] = (Network_BA, pos_BA)
-    plot_network(Network_BA, pos_BA)
+    plot_network(Network_BA, pos_BA, parent="networks")
 
     ## Binary SBM
-    sbm_p, sbm_q = 2 * er_p, 0.01
-    # sbm_p, sbm_q = 2 * er_p, 0.001  # for large instances
+    # sbm_p, sbm_q = 2 * er_p, 0.01
+    sbm_p, sbm_q = 2 * er_p, 0.001  # for large instances
     u = 2023
-    while not nx.is_connected(nx.random_partition_graph([size_cluster for _ in range(num_clusters)], sbm_p, sbm_q, seed=u)):
+    while not nx.is_connected(
+            nx.random_partition_graph([size_cluster for _ in range(num_clusters)], sbm_p, sbm_q, seed=u)):
         u += 1
     Network_SBM = nx.random_partition_graph([size_cluster for _ in range(num_clusters)], sbm_p, sbm_q, seed=u)
     Network_SBM.name = f"SBM_{sbm_p}_{sbm_q}"
     pos_SBM = nx.spring_layout(Network_SBM)
     Networks['SBM'] = (Network_SBM, pos_SBM)
-    plot_network(Network_SBM, pos_SBM)
+    plot_network(Network_SBM, pos_SBM, parent="networks")
 
     ## Star Graph
     Network_Star = nx.star_graph(N - 1)
     Network_Star.name = f"Star"
     pos_Star = nx.spring_layout(Network_Star)
     Networks['Star'] = (Network_Star, pos_Star)
-    plot_network(Network_Star, pos_Star)
+    plot_network(Network_Star, pos_Star, parent="networks")
 
     ## Cycle(Ring) Graph
     Network_Cycle = nx.cycle_graph(N)
     Network_Cycle.name = f"Cycle"
     pos_Cycle = nx.spring_layout(Network_Cycle)
     Networks['Cycle'] = (Network_Cycle, pos_Cycle)
-    plot_network(Network_Cycle, pos_Cycle)
+    plot_network(Network_Cycle, pos_Cycle, parent="networks")
 
     ## Path Graph
     Network_Path = nx.path_graph(N)
     Network_Path.name = f"Path"
     pos_Path = nx.spring_layout(Network_Path)
     Networks['Path'] = (Network_Path, pos_Path)
-    plot_network(Network_Path, pos_Path)
+    plot_network(Network_Path, pos_Path, parent="networks")
 
-    T = int(1e4)  # number of iterations
-    K = 20  # total number of arms
-    k = 10  # number of arms per agent
-    # K = 40  # total number of arms (for larger instances)
-    # k = 20  # number of arms per agent (for larger instances)
+    T = int(2e3)  # number of iterations
+    # T = int(1e4)  # number of iterations
+    # K = 20  # total number of arms
+    # k = 10  # number of arms per agent
+    K = 40  # total number of arms (for larger instances)
+    k = 20  # number of arms per agent (for larger instances)
 
     # arm set and their mean rewards
-    if not os.path.exists("results/means.npz"):
-        tmp = np.random.uniform(size=K)
-        np.savez("results/means.npz", tmp=tmp)
+    if not os.path.exists("means.npz"):
+        tmp = np.sort(np.random.uniform(size=K))
+        np.savez("means.npz", tmp=tmp)
     else:
-        tmp = np.load("results/means.npz")
+        tmp = np.load("means.npz")
         tmp = tmp['tmp']
+    # if not os.path.exists("results-{uniform}/means.npz"):
+    #     tmp = np.sort(np.random.uniform(size=K))
+    #     np.savez("results-{uniform}/means.npz", tmp=tmp)
+    # else:
+    #     tmp = np.load("results-{uniform}/means.npz")
+    #     tmp = tmp['tmp']
     # tmp = [0.5 * int(k == K-1) + 0.5 for k in range(K)]
     # tmp = [np.random.uniform() * int(k != K-1) + int(k == K-1) for k in range(K)]
     reward_avgs = {a: tmp[a] for a in range(K)}
     total_arm_set = list(range(K))
 
-    # distributing the arms uniformly at random, until the union over all agents is the whole set
-    if not os.path.exists("results/arm_sets.npz"):
-        while True:
-            arm_sets = [set(np.random.choice(total_arm_set, size=k, replace=False)) for _ in range(N)]
-
-            if set(range(K)) == set.union(*arm_sets):
-                arm_sets = [list(item) for item in arm_sets]
-                break
-        np.savez("results/arm_sets.npz", arm_sets=arm_sets)
-    else:
-        arm_sets = np.load("results/arm_sets.npz")
-        arm_sets = arm_sets['arm_sets']
-
     # experiments
     for RG_model in ['ER', 'BA', 'SBM']:
-    # for RG_model in ['ER', 'BA', 'SBM', 'Path', 'Cycle', 'Star']:
+        # for RG_model in ['ER', 'BA', 'SBM', 'Path', 'Cycle', 'Star']:
         # for bandwidth in ["", "-bandwidth"]:
-        for bandwidth in [""]:
-            print(f"{bandwidth}, {RG_model}; N={N},K={K},k={k},T={T}")
-            path = f"results/heterogeneous_K={K}{bandwidth}"
+        bandwidth=""
+        for uniform in ["uniform","nonuniform"]:
+            print(f"{bandwidth}, {RG_model}, {uniform}; N={N},K={K},k={k},T={T}")
+            path = f"results-{uniform}/heterogeneous_K={K}{bandwidth}"
             # create paths
+            if not os.path.exists(f"results-{uniform}/networks"):
+                os.makedirs(f"results-{uniform}/networks")
             if not os.path.exists(path):
                 os.makedirs(path)
             if not os.path.exists(path + f"/{RG_model}"):
                 os.makedirs(path + f"/{RG_model}")
-            if not os.path.exists(f"{path}/networks"):
-                os.makedirs(f"{path}/networks")
 
             # load Network
             Network, pos = Networks[RG_model]
 
-            # create agents with k-uniformly distributed arms
+            # distributing the arms uniformly at random, until the union over all agents is the whole set
+            if not os.path.exists(f"results-{uniform}/arm_sets.json"):
+                # "uniform" or "nonuniform"
+                arm_sets = create_arm_sets(Network, K, k, uniform)
+                with open(f"results-{uniform}/arm_sets.json", "w") as f:
+                    json.dump(arm_sets, f)
+            else:
+                with open(f"results-{uniform}/arm_sets.json", "r") as f:
+                    arm_sets = json.load(f)
+
+            # create agents with the distributed arms
             Agents = [Agent(v, arm_sets[v], reward_avgs, Network, 0, 0, K) for v in range(N)]
 
-            # draw network for each arm
+            # plot arm-specific networks
             for arm in range(K):
                 color_map = []
                 for v in range(N):
@@ -316,45 +344,52 @@ if __name__ == '__main__':
 
                 # color the agents corresponding to the arm
                 f = plt.figure(1000 * arm)
-                plot_network(Network, pos, f"results/networks/{Network.name}_{arm}.pdf", color_map)
+                plot_network(Network, pos, fname=f"results-{uniform}/networks/{Network.name}_{arm}.pdf", node_color=color_map)
 
             # algorithms for comparison
-            mps, n_gossips = ["baseline", f"Flooding{bandwidth}", f"Flooding-Absorption{bandwidth}"], [None, 1]
+            # mps, n_gossips = ["baseline", f"Flooding{bandwidth}", f"Flooding-Absorption{bandwidth}"], [None, 1]
+            mps, n_gossips = [f"Flooding-Absorption{bandwidth}", f"Flooding-Poisson{bandwidth}", f"Flooding{bandwidth}",
+                              f"Flooding-RandomStop{bandwidth}-0.2", f"Flooding-RandomStop{bandwidth}-0.5",
+                              f"Flooding-RandomStop{bandwidth}-0.8", f"Flooding-RandomStop{bandwidth}-0.95"], [None]
 
             # Experiment #1.1 Comparing regrets (over iteration t)
-            gammas = [1]
-            ps = [1.0]
-            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
-            plt.clf()
+            # gammas = [1]
+            # ps = [1.0]
+            # main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+            # plt.clf()
 
             gammas = [2]
             ps = [1.0]
-            naive_p = 0.2
-            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}_naive", naive_p)
-            plt.clf()
-
-            # Experiment #1.2 Effect of gamma, under perfect communication
-            gammas = [1, 2, 3, 4]  # max number of rounds for message passing
-            ps = [1.0]
             main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
             plt.clf()
 
-            # Experiment #1.3 Effect of varying p
-            # p: probability that a message is *not* lost
-            ps = list(np.linspace(0, 1.0, num=21))
-            gammas = [2]  # number of rounds for message passing
-            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
-            plt.clf()
-
-            # Experiment #1.3.1 Effect of varying p for IRS
-            # p: probability that a message is *not* lost
-            ps = list(np.linspace(0, 1.0, num=21))
-            main_parallel(Network, Agents, T, N, K, [f"Flooding{bandwidth}"], [None], [1], ps, 10,
-                          path + f"/{RG_model}")
-            plt.clf()
-
-            # Experiment #1.1.1
             gammas = [3]
             ps = [1.0]
             main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
             plt.clf()
+
+            # Experiment #1.2 Effect of gamma, under perfect communication
+            gammas = [1, 2, 3, 4]  # max (or avg for Poisson time) number of rounds for message passing
+            ps = [1.0]
+            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+            plt.clf()
+
+            # # Experiment #1.3 Effect of varying p
+            # # p: probability that the packet of messsages is *not* lost
+            # ps = list(np.linspace(0, 1.0, num=21))
+            # gammas = [2]  # number of rounds for message passing
+            # main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+            # plt.clf()
+            #
+            # # Experiment #1.3.1 Effect of varying p for IRS
+            # # p: probability that a message is *not* lost
+            # ps = list(np.linspace(0, 1.0, num=21))
+            # main_parallel(Network, Agents, T, N, K, [f"Flooding{bandwidth}"], [None], [1], ps, 10,
+            #               path + f"/{RG_model}")
+            # plt.clf()
+            #
+            # # Experiment #1.1.1
+            # gammas = [3]
+            # ps = [1.0]
+            # main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+            # plt.clf()

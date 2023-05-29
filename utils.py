@@ -72,12 +72,12 @@ def plot_final_discrete(final_means, final_stds, xs, title, xlabel, fname, legen
     # plt.show()
 
 
-def plot_network(Network, pos=None, fname=None, node_color=None):
+def plot_network(Network, pos=None, parent=None, fname=None, node_color=None):
     plt.figure(1000)
     if pos is None:
         pos = nx.spring_layout(Network)
-    if fname is None:
-        fname = f"results/networks/{Network.name}.pdf"
+    if fname is None and parent is not None:
+        fname = f"{parent}/{Network.name}.pdf"
     if node_color is None:
         nx.draw_networkx(Network, with_labels=True, pos=pos, node_size=100, font_size=8)
     else:
