@@ -38,6 +38,7 @@ class Message:
         self.hash_value = hash_value
         self.v_prev = v_prev
         self.gamma = gamma
+        self.original_gamma = gamma
 
     def decay(self):
         self.gamma -= 1
@@ -99,6 +100,9 @@ class Agent:
         # hash values of messages that he has seen
         self.history = deque()
 
+        # list of times in which messages get absorbed
+        self.message_absorption_times = []
+
     # one round of UCB_network
     def UCB_network(self):
         # warm-up
@@ -155,6 +159,7 @@ class Agent:
     def store_message(self, message):
         message.decay()
         if message.gamma < 0:  # if the message is not yet expired, for MP
+            self.message_absorption_times.append(message.original_gamma)
             del message
         else:
             message.update(self.idx)  # update message.v_prev to the current agent
@@ -168,6 +173,7 @@ class Agent:
                     self.total_visitations[message.arm] += 1
                     self.total_rewards[message.arm] += message.reward
                     if "Absorption" in self.mp:
+                        self.message_absorption_times.append(message.original_gamma - message.gamma)
                         del message
                     # RS_p: random stopping probability
                     # if it's randomly stopped, then delete the message
@@ -175,6 +181,7 @@ class Agent:
                         # if "RandomStop" in problem.mp and np.random.binomial(1, problem.RS_p) == 1:
                         RS_p = float(re.findall(r"[\d\.\d]+", self.mp)[0])
                         if np.random.binomial(1, RS_p) == 1:
+                            self.message_absorption_times.append(message.original_gamma - message.gamma)
                             del message
                         else:
                             self.store_message(message)
@@ -301,7 +308,12 @@ def run_ucb(problem, p):
     Group_Regrets = np.sum(np.array(Regrets), axis=0)
     Group_Communications = np.sum(np.array(Communications), axis=0)
 
-    return Group_Regrets, Group_Communications, np.array(Edge_Messages)
+    # message absorption times
+    message_absorption_times = []
+    for Agent in Agents:
+        message_absorption_times += Agent.message_absorption_times
+
+    return Group_Regrets, Group_Communications, np.array(Edge_Messages), message_absorption_times
 
 
 def interfere(messages):
