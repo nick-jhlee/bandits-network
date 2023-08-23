@@ -88,7 +88,7 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
     # n_gossip, mp, gamma, p, repeat
     params = list(product(mps, n_gossips, gammas, ps, range(n_repeats)))
     # run experiment only once for baseline
-    params = [item for item in params if item[0] != "baseline" or (item[0] == "baseline" and item[1] is None)]
+    params = [item for item in params if "baseline" not in item[0] or ("baseline" in item[0] and item[1] is None)]
     # remove Hitting+Gossiping
     params = [item for item in params if "Absorption" not in item[0] or item[1] is None]
 
@@ -104,7 +104,7 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
         # print process id
         print(f"Finished: {multiprocess.process.current_process()}, {param}")
 
-        return result   # Group_Regrets, Group_Communications, np.array(Edge_Messages), message_absorption_times
+        return result  # Group_Regrets, Group_Communications, np.array(Edge_Messages), message_absorption_times
 
     # run the experiments in parallel
     with Pool() as pool:
@@ -136,8 +136,7 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
     def f(partial_param):
         total_regret = np.zeros((n_repeats, length))
         total_communication = np.zeros((n_repeats, length))
-        total_messages_1 = np.zeros((n_repeats, length))
-        total_messages_2 = np.zeros((n_repeats, length))
+        edge_messages = np.zeros((n_repeats, length))
         message_absorption_times = []
 
         for repeat, i in product(range(n_repeats), range(length)):
@@ -149,15 +148,7 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
                     message_absorption_times += everything[idx][3]
                 # number of messages passing through the bottleneck edge!
                 if 'SBM' in Network.name:
-                    if N == 20:
-                        total_messages_1[repeat][i] = everything[idx][2][original_edges.index((7, 14))][i]
-                        total_messages_2[repeat][i] = everything[idx][2][original_edges.index((8, 14))][i]
-                    elif N == 100:
-                        total_messages_1[repeat][i] = everything[idx][2][original_edges.index((1, 74))][i]
-                        total_messages_2[repeat][i] = everything[idx][2][original_edges.index((37, 70))][i]
-                    else:
-                        total_messages_1[repeat][i] = everything[idx][2][0][i]
-                        total_messages_2[repeat][i] = everything[idx][2][1][i]
+                    edge_messages[repeat][i] = everything[idx][2][i]
             else:
                 if exp_type == "vary_p":
                     idx = params.index(partial_param + (gamma, l[i], repeat))
@@ -169,13 +160,13 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
                 total_regret[repeat][i] = everything[idx][0][-1]
                 total_communication[repeat][i] = everything[idx][1][-1]
 
-        return total_regret, total_communication, total_messages_1, total_messages_2, message_absorption_times
+        return total_regret, total_communication, edge_messages, message_absorption_times
 
     # collect datas in parallel
     partial_params = list(product(mps, n_gossips))
     # run experiment only once for baseline
     partial_params = [item for item in partial_params if
-                      item[0] != "baseline" or (item[0] == "baseline" and item[1] is None)]
+                      "baseline" not in item[0] or ("baseline" in item[0] and item[1] is None)]
     # remove Hitting+Gossiping
     partial_params = [item for item in partial_params if "Absorption" not in item[0] or item[1] is None]
 
@@ -186,45 +177,39 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
     final_regrets_mean, final_regrets_std = [], []
     final_communications_mean, final_communications_std = [], []
     final_messages_mean_1, final_messages_std_1 = [], []
-    final_messages_mean_2, final_messages_std_2 = [], []
     final_absorption_times = []
-    for total_regret, total_communication, total_message_1, total_message_2, total_absorption_time in finals:
+    for total_regret, total_communication, edge_message, total_absorption_time in finals:
         final_regrets_mean.append(np.mean(total_regret, axis=0))
         final_regrets_std.append(np.std(total_regret, axis=0))
         final_communications_mean.append(np.mean(total_communication, axis=0))
         final_communications_std.append(np.std(total_communication, axis=0))
         final_absorption_times.append(total_absorption_time)
         if 'SBM' in Network.name:
-            final_messages_mean_1.append(np.mean(total_message_1, axis=0))
-            final_messages_std_1.append(np.std(total_message_1, axis=0))
-            final_messages_mean_2.append(np.mean(total_message_2, axis=0))
-            final_messages_std_2.append(np.std(total_message_2, axis=0))
+            final_messages_mean_1.append(np.mean(edge_message, axis=0))
+            final_messages_std_1.append(np.std(edge_message, axis=0))
 
     if exp_type == "vary_p":
         title_regret = f"Final Regret ({Network.name}, gamma={gamma})"
-        fname_regret = f"{path}/Regret_final_p_gamma={gamma}_{Network.name}"
+        fname_regret = f"{path}/Regret_final_p_gamma={gamma}"
 
         title_communication = f"Final Communication ({Network.name}, gamma={gamma})"
-        fname_communication = f"{path}/Communication_final_p_gamma={gamma}_{Network.name}"
+        fname_communication = f"{path}/Communication_final_p_gamma={gamma}"
     elif exp_type == "vary_gamma":
         title_regret = f"Final Regret ({Network.name}, p={p})"
-        fname_regret = f"{path}/Regret_final_gamma_p={p}_{Network.name}"
+        fname_regret = f"{path}/Regret_final_gamma_p={p}"
 
         title_communication = f"Final Communication ({Network.name}, p={p})"
-        fname_communication = f"{path}/Communication_final_gamma_p={p}_{Network.name}"
+        fname_communication = f"{path}/Communication_final_gamma_p={p}"
     elif exp_type == "vary_t":
         title_regret = f"Final Regret ({Network.name}, p={p}, gamma={gamma})"
-        fname_regret = f"{path}/Regret_final_t_p={p}_gamma={gamma}_{Network.name}"
+        fname_regret = f"{path}/Regret_final_t_p={p}_gamma={gamma}"
 
         title_communication = f"Final Communication ({Network.name}, p={p}, gamma={gamma})"
-        fname_communication = f"{path}/Communication_final_t_p={p}_gamma={gamma}_{Network.name}"
+        fname_communication = f"{path}/Communication_final_t_p={p}_gamma={gamma}"
 
         if 'SBM' in Network.name:
-            title_message_1 = f"# of Messages in Bottleneck Edge (7, 14) ({Network.name}, p={p}, gamma={gamma})"
-            fname_message_1 = f"{path}/Message_final_t_(7,14)_p={p}_gamma={gamma}_{Network.name}"
-
-            title_message_2 = f"# of Messages in Bottleneck Edge (8, 14) ({Network.name}, p={p}, gamma={gamma})"
-            fname_message_2 = f"{path}/Message_final_t_(8,14)_p={p}_gamma={gamma}_{Network.name}"
+            title_message_1 = f"# of Messages in Bottleneck Edge (12, 21) ({Network.name}, p={p}, gamma={gamma})"
+            fname_message_1 = f"{path}/Message_final_t_(12,21)_p={p}_gamma={gamma}"
     else:
         raise ValueError("Are we fixing p or gamma?")
 
@@ -246,20 +231,20 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
     if exp_type == "vary_t" and 'SBM' in Network.name:
         plot(np.array(final_messages_mean_1), np.array(final_messages_std_1), l,
              title_message_1, x_label, f"{fname_message_1}.pdf", legends)
-        plot(np.array(final_messages_mean_2), np.array(final_messages_std_2), l,
-             title_message_2, x_label, f"{fname_message_2}.pdf", legends)
 
-    # plotting histogram of absorption time of messages over time
-    with open(f"{path}/message_absorption_times_p={p}_gamma={gamma}_{Network.name}.json", 'w') as f:
-        json.dump(final_absorption_times, f)
-    plt.hist(final_absorption_times, label=mps)
-    plt.legend()
-    plt.savefig(f"{path}/message_absorption_times_p={p}_gamma={gamma}_{Network.name}.pdf", dpi=1200, bbox_inches='tight')
+    if exp_type != "vary_gamma":
+        # plotting histogram of absorption time of messages over time
+        with open(f"{path}/message_absorption_times_p={p}_gamma={gamma}.json", 'w') as f:
+            json.dump(final_absorption_times, f)
+        plt.hist(final_absorption_times, label=mps)
+        plt.legend()
+        plt.savefig(f"{path}/message_absorption_times_p={p}_gamma={gamma}.pdf", dpi=1200,
+                    bbox_inches='tight')
+
 
 if __name__ == '__main__':
     num_clusters = 2  # for SBM
     size_cluster = 20
-    # size_cluster = 10
     N = size_cluster * num_clusters  # number of agents
     # er_p = 2 * log(N) / N
     er_p = 1.001 * log(N) / N  # for large instances
@@ -301,6 +286,22 @@ if __name__ == '__main__':
     pos_SBM = nx.spring_layout(Network_SBM)
     Networks['SBM'] = (Network_SBM, pos_SBM)
     plot_network(Network_SBM, pos_SBM, parent="networks")
+
+    ## Multi-star graph
+    Network_MultiStar = nx.Graph()
+    Network_MultiStar.add_nodes_from(range(N))
+    # initial star
+    Network_MultiStar.add_edges_from([(0, i) for i in range(1, 6)])
+    # star for each leaf, recursively untiol the total number of vertices is N
+    for i in range(1, 6):
+        Network_MultiStar.add_edges_from([(i, j + 5 * i) for j in range(1, 6)])
+    # one more star
+    Network_MultiStar.add_edges_from([(30, j + 30) for j in range(1, 10)])
+    # star for each subleaf, until the number of vertices is N
+    Network_MultiStar.name = f"MultiStar"
+    pos_MultiStar = nx.spring_layout(Network_MultiStar)
+    Networks['MultiStar'] = (Network_MultiStar, pos_MultiStar)
+    plot_network(Network_MultiStar, pos_MultiStar, parent="networks")
 
     ## Star Graph
     Network_Star = nx.star_graph(N - 1)
@@ -358,100 +359,109 @@ if __name__ == '__main__':
             arm_sets_uniform = json.load(f)
 
     # experiments
-    for RG_model in ['SBM', 'ER', 'BA']:
-        # for RG_model in ['ER', 'BA', 'SBM', 'Path', 'Cycle', 'Star']:
-        # for bandwidth in ["", "-bandwidth"]:
-        bandwidth = ""
-        for uniform in ["nonuniform", "uniform"]:
-            print(f"{bandwidth}, {RG_model}, {uniform}; N={N},K={K},k={k},T={T}")
-            path = f"results-{uniform}/heterogeneous_K={K}{bandwidth}"
-            # create paths
-            if not os.path.exists(f"results-{uniform}/networks"):
-                os.makedirs(f"results-{uniform}/networks")
-            if not os.path.exists(path):
-                os.makedirs(path)
-            if not os.path.exists(path + f"/{RG_model}"):
-                os.makedirs(path + f"/{RG_model}")
+    # for dynamic in ["", "_dynamic_sparse", "_dynamic_dense", "_dynamic_hybrid"]:
+    for dynamic in [""]:
+        for RG_model in ['SBM']:
+        # for RG_model in ['ER', 'BA', 'SBM']:
+            # for RG_model in ['ER', 'BA', 'SBM', 'Path', 'Cycle', 'Star']:
+            for uniform in ["uniform"]:
+                # for uniform in ["nonuniform", "uniform"]:
+                print(f"{dynamic} {RG_model}, {uniform}; N={N},K={K},k={k},T={T}")
+                path = f"results-{uniform}/heterogeneous_K={K}{dynamic}"
+                # create paths
+                if not os.path.exists(f"results-{uniform}/networks"):
+                    os.makedirs(f"results-{uniform}/networks")
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                if not os.path.exists(path + f"/{RG_model}"):
+                    os.makedirs(path + f"/{RG_model}")
 
-            # load Network
-            Network, pos = Networks[RG_model]
+                # load Network
+                Network, pos = Networks[RG_model]
 
-            # set arm sets
-            if not os.path.exists(f"{path}/{RG_model}/arm_sets.json"):
-                # "uniform" or "nonuniform"
-                if uniform == "uniform":
-                    arm_sets = arm_sets_uniform
-                else:
-                    # arm_sets = create_nonuniform_arm_sets(Network, K, arm_sets_uniform)
-                    arm_sets = create_nonuniform_arm_sets(Network, K, k)
-                with open(f"{path}/{RG_model}/arm_sets.json", "w") as f:
-                    json.dump(arm_sets, f)
-            else:
-                with open(f"{path}/{RG_model}/arm_sets.json", "r") as f:
-                    arm_sets = json.load(f)
-
-            # create agents with the distributed arms
-            Agents = [Agent(v, arm_sets[v], reward_avgs, Network, 0, 0, K) for v in range(N)]
-
-            # plot arm-specific networks
-            for arm in range(K):
-                color_map = []
-                for v in range(N):
-                    if arm in Agents[v].arm_set:
-                        color_map.append('red')
+                # set arm sets
+                if not os.path.exists(f"{path}/{RG_model}/arm_sets.json"):
+                    # "uniform" or "nonuniform"
+                    if uniform == "uniform":
+                        arm_sets = arm_sets_uniform
                     else:
-                        color_map.append('blue')
+                        # arm_sets = create_nonuniform_arm_sets(Network, K, arm_sets_uniform)
+                        arm_sets = create_nonuniform_arm_sets(Network, K, k)
+                    with open(f"{path}/{RG_model}/arm_sets.json", "w") as f:
+                        json.dump(arm_sets, f)
+                else:
+                    with open(f"{path}/{RG_model}/arm_sets.json", "r") as f:
+                        arm_sets = json.load(f)
 
-                # color the agents corresponding to the arm
-                f = plt.figure(1000 * arm)
-                plot_network(Network, pos, fname=f"results-{uniform}/networks/{Network.name}_{arm}.pdf",
-                             node_color=color_map)
+                # create agents with the distributed arms
+                Agents = [Agent(v, arm_sets[v], reward_avgs, Network, 0, 0, K) for v in range(N)]
 
-            # algorithms for comparison
-            # mps, n_gossips = ["baseline", f"Flooding{bandwidth}", f"Flooding-Absorption{bandwidth}"], [None, 1]
-            # mps, n_gossips = [f"Flooding-Absorption{bandwidth}", f"Flooding-Poisson{bandwidth}", f"Flooding{bandwidth}",
-            #                   f"Flooding-RandomStop{bandwidth}-0.2", f"Flooding-RandomStop{bandwidth}-0.5",
-            #                   f"Flooding-RandomStop{bandwidth}-0.8", f"Flooding-RandomStop{bandwidth}-0.95"], [None]
-            mps, n_gossips = [f"Flooding-Absorption{bandwidth}", f"Flooding-RandomStop{bandwidth}-0.95"], [None]
+                # plot arm-specific networks
+                for arm in range(K):
+                    color_map = []
+                    for v in range(N):
+                        if arm in Agents[v].arm_set:
+                            color_map.append('red')
+                        else:
+                            color_map.append('blue')
 
-            # Experiment #1.1 Comparing regrets (over iteration t)
-            # gammas = [1]
-            # ps = [1.0]
-            # main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
-            # plt.clf()
+                    # color the agents corresponding to the arm
+                    f = plt.figure(1000 * arm)
+                    plot_network(Network, pos, fname=f"results-{uniform}/networks/{Network.name}_{arm}.pdf",
+                                 node_color=color_map)
 
-            gammas = [10]
-            ps = [1.0]
-            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
-            plt.clf()
+                # algorithms for comparison
+                # mps, n_gossips = [f"baseline{dynamic}", f"Flooding-Absorption{dynamic}", f"Flooding{dynamic}"], [1, None]
+                mps, n_gossips = [f"Flooding-Absorption{dynamic}", f"Flooding{dynamic}"], [None]
+                # mps, n_gossips = [f"Flooding-Absorption{dynamic}", f"Flooding-Poisson{dynamic}", f"Flooding{dynamic}",
+                #                   f"Flooding-RandomStop{dynamic}-0.2", f"Flooding-RandomStop{dynamic}-0.5",
+                #                   f"Flooding-RandomStop{dynamic}-0.8", f"Flooding-RandomStop{dynamic}-0.95"], [None]
+                # mps, n_gossips = [f"Flooding-Absorption{dynamic}", f"Flooding{dynamic}",
+                #                   f"Flooding-RandomStop{dynamic}-0.2", f"Flooding-RandomStop{dynamic}-0.5",
+                #                   f"Flooding-RandomStop{dynamic}-0.8", f"Flooding-RandomStop{dynamic}-0.95"], [None]
+                # mps, n_gossips = [f"Flooding-Absorption{dynamic}", f"Flooding{dynamic}",
+                #                   f"Flooding-RandomStop{dynamic}-0.5"], [None]
+                # mps, n_gossips = [f"Flooding-Absorption{dynamic}", f"Flooding-RandomStop{dynamic}-0.95"], [None]
 
-            gammas = [5]
-            ps = [1.0]
-            main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
-            plt.clf()
+                # Experiment #1.1 Comparing regrets (over iteration t)
+                # gammas = [1]
+                # ps = [1.0]
+                # main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+                # plt.clf()
 
-            # # Experiment #1.2 Effect of gamma, under perfect communication
-            # gammas = [1, 2, 3, 4]  # max (or avg for Poisson time) number of rounds for message passing
-            # ps = [1.0]
-            # main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
-            # plt.clf()
+                gammas = [5]
+                ps = [1.0]
+                main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+                plt.clf()
 
-            # # Experiment #1.3 Effect of varying p
-            # # p: probability that the packet of messsages is *not* lost
-            # ps = list(np.linspace(0, 1.0, num=21))
-            # gammas = [2]  # number of rounds for message passing
-            # main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
-            # plt.clf()
-            #
-            # # Experiment #1.3.1 Effect of varying p for IRS
-            # # p: probability that a message is *not* lost
-            # ps = list(np.linspace(0, 1.0, num=21))
-            # main_parallel(Network, Agents, T, N, K, [f"Flooding{bandwidth}"], [None], [1], ps, 10,
-            #               path + f"/{RG_model}")
-            # plt.clf()
-            #
-            # # Experiment #1.1.1
-            # gammas = [3]
-            # ps = [1.0]
-            # main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
-            # plt.clf()
+                # gammas = [10]
+                # ps = [1.0]
+                # main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+                # plt.clf()
+
+                # if dynamic == "":
+                #     # Experiment #1.2 Effect of gamma, under perfect communication
+                #     gammas = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]  # max (or avg for Poisson time) number of rounds for message passing
+                #     ps = [1.0]
+                #     main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+                #     plt.clf()
+
+                # # Experiment #1.3 Effect of varying p
+                # # p: probability that the packet of messsages is *not* lost
+                # ps = list(np.linspace(0, 1.0, num=21))
+                # gammas = [2]  # number of rounds for message passing
+                # main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+                # plt.clf()
+                #
+                # # Experiment #1.3.1 Effect of varying p for IRS
+                # # p: probability that a message is *not* lost
+                # ps = list(np.linspace(0, 1.0, num=21))
+                # main_parallel(Network, Agents, T, N, K, [f"Flooding{dynamic}"], [None], [1], ps, 10,
+                #               path + f"/{RG_model}")
+                # plt.clf()
+                #
+                # # Experiment #1.1.1
+                # gammas = [3]
+                # ps = [1.0]
+                # main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, 10, path + f"/{RG_model}")
+                # plt.clf()

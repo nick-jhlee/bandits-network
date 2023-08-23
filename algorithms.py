@@ -2,7 +2,8 @@ from utils import *
 import re
 from collections import deque
 from scipy.stats import cauchy, levy
-from math import inf
+from math import inf, log
+import random
 
 from tqdm import tqdm
 import multiprocess
@@ -49,7 +50,7 @@ class Message:
     def corrupt(self, mp):
         if np.random.binomial(1, 0.5) == 1:
             if "gaussian" in mp:
-                self.reward += np.random.normal(0.1, 0.01)
+                self.reward += np.random.normal(0.0, 0.01)
             elif "zero" in mp:
                 self.reward = 0
             elif "heavy" in mp:
@@ -103,6 +104,9 @@ class Agent:
         # list of times in which messages get absorbed
         self.message_absorption_times = []
 
+        # for adaptive TTL scheme
+        self.returns = {}
+
     # one round of UCB_network
     def UCB_network(self):
         # warm-up
@@ -145,6 +149,11 @@ class Agent:
         # next time step
         self.t += 1
 
+        if "adaptive" in self.mp:
+            # adaptive TTL (if its msg is return too many times, reduce TTL by 1!)
+            if len(self.returns) > 0 and max(self.returns.values()) > 3:
+                self.gamma = max(self.gamma - 1, 1)
+
         # poisson clock for message expiration, for testing random stop time.
         if "Poisson" in self.mp:
             new_gamma = np.random.poisson(self.gamma)
@@ -152,7 +161,9 @@ class Agent:
             new_gamma = self.gamma
         # message to be sent to his neighbors
         if new_gamma - 1 >= 0:
-            return Message(arm, reward, hash((self.idx, arm, reward)), self.idx, new_gamma - 1)
+            msg_hash = hash((self.idx, arm, reward))
+            self.returns[msg_hash] = 0
+            return Message(arm, reward, msg_hash, self.idx, new_gamma - 1)
         else:
             return None
 
@@ -167,24 +178,30 @@ class Agent:
 
     def receive(self, message):
         if message is not None:
+            # check for the number of returns of hash values
+            if message.hash_value in self.returns.keys():   # if the message is return to the agent
+                self.returns[message.hash_value] += 1
             # receive, depending on the communication protocol!
-            if "Flooding" in self.mp:
+            # RS_p: random stopping probability
+            if "RandomStop" in self.mp:
+                # if "RandomStop" in problem.mp and np.random.binomial(1, problem.RS_p) == 1:
+                RS_p = float(re.findall(r"[\d\.\d]+", self.mp)[0])
+                # if it's randomly stopped, then delete the message
+                if np.random.binomial(1, RS_p) == 1:
+                    self.message_absorption_times.append(message.original_gamma - message.gamma)
+                    del message
+                else:
+                    if message.arm in self.arm_set:
+                        self.total_visitations[message.arm] += 1
+                        self.total_rewards[message.arm] += message.reward
+                    self.store_message(message)
+            elif "Flooding" in self.mp:
                 if message.arm in self.arm_set:
                     self.total_visitations[message.arm] += 1
                     self.total_rewards[message.arm] += message.reward
                     if "Absorption" in self.mp:
                         self.message_absorption_times.append(message.original_gamma - message.gamma)
                         del message
-                    # RS_p: random stopping probability
-                    # if it's randomly stopped, then delete the message
-                    elif "RandomStop" in self.mp:
-                        # if "RandomStop" in problem.mp and np.random.binomial(1, problem.RS_p) == 1:
-                        RS_p = float(re.findall(r"[\d\.\d]+", self.mp)[0])
-                        if np.random.binomial(1, RS_p) == 1:
-                            self.message_absorption_times.append(message.original_gamma - message.gamma)
-                            del message
-                        else:
-                            self.store_message(message)
                     else:
                         self.store_message(message)
                 else:
@@ -195,6 +212,17 @@ class Agent:
             del message
 
 
+def update_network(Network, p, q):
+    cur_edges = nx.edges(Network)
+    cur_non_edges = nx.non_edges(Network)
+    for non_edge in cur_non_edges:
+        if np.random.binomial(1, p) == 1:
+            Network.add_edge(non_edge[0], non_edge[1])
+    for edge in cur_edges:
+        if np.random.binomial(1, q) == 1:
+            Network.remove_edge(edge[0], edge[1])
+
+
 def run_ucb(problem, p):
     # reseeding
     np.random.seed()
@@ -203,16 +231,39 @@ def run_ucb(problem, p):
     T, N = problem.T, problem.N
     Agents, Network = problem.Agents, problem.Network
     n_gossip, mp = problem.n_gossip, problem.mp
-    original_edges = list(Network.edges())
 
     # for logging
     Regrets = [[0 for _ in range(T)] for _ in range(N)]
     Communications = [[0 for _ in range(T)] for _ in range(N)]
-    Edge_Messages = [[0 for _ in range(T)] for _ in range(len(original_edges))]
+    Edge_Messages = [0 for _ in range(T)]  # for (12, 21), which is a sparse edge
 
     # run UCB
     # for t in tqdm(range(T)):
+    dynamic_p_sparse, dynamic_q_sparse = 0.04 / N, 1 / N
+    dynamic_p_dense, dynamic_q_dense = 0.1 / N, 0.2 / N
     for t in range(T):
+        if "dyanamic_sparse" in mp:
+            update_network(Network, dynamic_p_sparse, dynamic_q_sparse)
+        elif "dyanamic_dense" in mp:
+            update_network(Network, dynamic_p_dense, dynamic_q_dense)
+        elif "dyanamic_hybrid" in mp:
+            if t < T // 3:
+                update_network(Network, dynamic_p_dense, dynamic_q_dense)
+            else:
+                update_network(Network, dynamic_p_sparse, dynamic_q_sparse)
+
+        # ## Network switching
+        # if Network.name == "Star":
+        #     if np.random.binomial(1, 0.5) == 1:
+        #         Network = nx.complete_graph(N)  # complete graph
+        #     else:  # star graph, with random center!
+        #         Network = nx.Graph()
+        #         Network.add_nodes_from(range(N))
+        #         center = np.random.randint(N)
+        #         Network.add_edges_from([(center, i) for i in range(N) if i != center])
+
+        original_edges = list(Network.edges())
+
         # # fail edges randomly w.p. 1-p, i.i.d. -> for temporally changing graphs
         # failed_edges = [edge for edge in original_edges if np.random.binomial(1, p) == 0]
         # Network_modified = deepcopy(Network)
@@ -261,15 +312,12 @@ def run_ucb(problem, p):
                 # message broadcasting
                 while messages:
                     message = messages.pop()
-                    if message is None:
-                        del message
-                    else:
+                    # if the message is in-tact (e.g., didn't get destroyed in link failure)
+                    if message is not None:
                         # remove the previously originating agent
                         neighbors_new = [nbhd for nbhd in neighbors if nbhd != message.v_prev]
-                        # if the message hits a dead end, delete it
-                        if len(neighbors_new) == 0:
-                            del message
-                        else:
+                        # if the message does not hit a dead end, do message passing
+                        if len(neighbors_new) > 0:
                             # construct neighbors to which the message will be gossiped to (push protocol)
                             if n_gossip is None or n_gossip >= len(neighbors_new):
                                 gossip_neighbors = neighbors_new
@@ -280,6 +328,9 @@ def run_ucb(problem, p):
                                 message_copy = deepcopy(message)
                                 # update communication complexity
                                 Agents[v].communication += 1
+                                # update number of messages for (12, 21) (for SBM)
+                                if (v==12 and neighbor==21) or (v==21 and neighbor==12):
+                                    Edge_Messages[t] += 1
                                 # delete message if it has already been observed
                                 if message_copy.hash_value in Agents[neighbor].history:
                                     del message_copy
@@ -290,16 +341,11 @@ def run_ucb(problem, p):
                                     else:
                                         # update hash value history
                                         Agents[neighbor].history.append(message_copy.hash_value)
-                                        # update number of messages per edge
-                                        if v < neighbor:
-                                            Edge_Messages[original_edges.index((v, neighbor))][t] += 1
-                                        else:
-                                            Edge_Messages[original_edges.index((neighbor, v))][t] += 1
                                         if "corrupt" in problem.mp:
                                             message_copy.corrupt(problem.mp)
                                         Agents[neighbor].receive(message_copy)
-                            # delete the message sent by the originating agent, after communication is complete
-                            del message
+                    # delete the message sent by the originating agent, after communication is complete
+                    del message
 
             Communications[v][t] = Agents[v].communication
 
@@ -323,59 +369,3 @@ def interfere(messages):
             # messages.remove(message)
             return deque([None])
     return messages
-
-
-def non_blocking_power(Network, arm_sets, gamma, a):
-    Network_result = deepcopy(Network)
-    for v, w in combinations(Network.nodes, 2):
-        if nx.has_path(Network, v, w) or nx.has_path(Network, w, v):
-            try:
-                for path in nx.all_simple_paths(Network, v, w, gamma):
-                    if len(path) == 1:
-                        raise ValueError
-                    else:
-                        tmp = True
-                        for u in path[1:-1]:
-                            if a in arm_sets[u]:
-                                tmp = False
-                        if tmp:
-                            raise ValueError
-            except:
-                Network_result.add_edge(v, w)
-    return Network_result
-
-
-def compute_invariants(Network, arm_sets, reward_avgs, K, gamma):
-    # tilde{Delta]_a^v as in Yang et al., INFOCOM 2022
-    Deltas = []
-    for a in range(K):
-        Delta = inf
-        for v in Network.nodes:
-            arm_set = arm_sets[v]
-            if a in arm_set:
-                delta = max(reward_avgs[arm_set]) - reward_avgs[a]
-                if Delta > delta > 0:
-                    Delta = delta
-        if Delta == inf:
-            Delta = 0
-        Deltas.append(Delta)
-
-    # Compute theta([G^gamma]_{-a})
-    Thetas, Thetas_FWA = [], []
-    Network_gamma = nx.power(Network, gamma)
-    output = 0
-    for a in range(K):
-        Agents_a = [v for v in Network.nodes if a in arm_sets[v] and max(reward_avgs[arm_sets[v]]) - reward_avgs[a] > 0]
-
-        Network_gamma_a = Network_gamma.subgraph(Agents_a)
-        theta = nx.chromatic_number(nx.complement(Network_gamma_a))  # theta(G) = chromatic_number(complement of G)
-        Thetas.append(theta)
-
-        Network_gamma_a_nonblocking = non_blocking_power(Network, arm_sets, gamma, a)
-        Network_gamma_a_nonblocking = Network_gamma_a_nonblocking.subgraph(Agents_a)
-        theta_FWA = nx.chromatic_number(nx.complement(Network_gamma_a_nonblocking))
-        Thetas_FWA.append(theta_FWA)
-
-        output += int(Deltas[a] > 0) * (theta_FWA - theta)
-
-    return list(zip(Deltas, Thetas, Thetas_FWA)), output

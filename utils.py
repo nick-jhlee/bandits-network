@@ -1,6 +1,5 @@
 import numpy as np
-# import networkx as nx
-import grinpy as nx
+import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
 
