@@ -1,0 +1,877 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c6a9944a-1b5b-453a-8f83-4329c8c58a0c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/BA_2.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/ER_0.03.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/SBM_0.3_0.003.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/dynamic/BA/Communication_final_t_plot.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/dynamic/BA/Message_final_t_(0, 1)_p=1.0_gamma=4.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/dynamic/BA/Regret_final_t_plot.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/dynamic/ER/Communication_final_t_plot.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/dynamic/ER/Message_final_t_(0, 12)_p=1.0_gamma=4.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/dynamic/ER/Regret_final_t_plot.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/static/BA/Communication_final_t_plot.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/static/BA/Message_final_t_(0, 1)_p=1.0_gamma=4.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/static/BA/Regret_final_t_plot.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/static/ER/Communication_final_t_plot.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/static/ER/Message_final_t_(0, 12)_p=1.0_gamma=4.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/static/ER/Regret_final_t_plot.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/static/SBM/Communication_final_t_plot.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/static/SBM/Message_final_t_(11,53)_p=1.0_gamma=4.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OPODIS2023_figures/static/SBM/Regret_final_t_plot.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_gamma/networks/ER_0.4_2023.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_gamma/networks/ER_0.4_2024.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.003218297948685432.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.0036840314986403863.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.007824046010856293.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.009222198635284841.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.01.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.011337324605540518.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.014978661367769954.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.025572147395193312.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.026934449952328816.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.02899534192334717.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.032543311076288675.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.03684031498640387.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.03692573435860127.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.04105263157894737.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.0422694140370318.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.043320248779530335.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.0446467012693728.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.04665335924115383.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.04847409866632088.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.05010796078480739.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.06010788234623789.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.06106835016386735.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.06235895258641677.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.06431137655896048.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.06767261049332612.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.0706331707685171.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.0717416660261549.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.07210526315789473.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.07368062997280773.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.07881645154820437.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.08007120390346076.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.08085479657542322.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.08196939387676713.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.0833754497060719.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.08523726020184484.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.09500923338598892.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.09656455293254139.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.09778345522050473.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.09962741119457379.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.1.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.10280190991036356.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.1031578947368421.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.10434060717843296.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.10664301706590593.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.11052094495921161.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.11431265431687841.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.11549570653754873.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.11728542851238043.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.11827680074582293.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.11944017911381465.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.12036655961888228.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.12991058442573994.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.13206075570121542.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.13320795785459272.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.13421052631578947.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.1349434458301871.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.137931209327401.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.1380480435883488.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.14154436810565693.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.14736125994561547.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.14980885708555244.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.15092020917163668.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.15260146314799375.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.15317815178557395.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.15549585903591973.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.15802556165220605.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.164811935465491.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.16526315789473683.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.1675569584698895.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.16863246048868066.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.1702594804658004.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.17175547999826463.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.17306050874443846.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.176445719145408.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.18420157493201933.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.1853050598542265.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.1863447118057246.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.18791749778360706.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.188079502825325.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.1906251584529572.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.19631578947368422.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.19661094419059744.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.199713286505242.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.20305316123856354.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2040569631227686.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.20546291640818048.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2055755151014137.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.20818980816147586.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.211347070185159.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.22080126262290053.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.22104188991842316.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2217692144398126.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.22298085386507602.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.22323353241922034.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.22575445786999465.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.22736842105263158.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.234614637544993.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2351963267289889.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.23854936400723759.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.23917035281809632.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.23948146575685655.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.24089154973702698.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.24331910757851333.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.24624842122491003.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2562974653915746.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2571937170739006.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.25788220490482705.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.25842105263157894.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2585495670548337.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.26088375728703206.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.27287778922801215.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2737817092673803.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2740455667759116.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.27490596839094456.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2762075843726403.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.27844840699555073.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2894736842105263.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2917936681602486.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2926182197079885.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.29386560169044695.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.29472251989123094.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.2960130567040695.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.30658522563792795.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3095417695445856.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3103304710250325.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3115236190082536.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3123670918057717.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.31357770641258825.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.32052631578947366.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3272898709289226.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.32804272234207643.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3291816363260603.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.33114235612110693.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.33156283487763477.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3402926620478438.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.34503797231325967.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.34575497365912045.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.346839653643867.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.34870700582962566.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3509524743441631.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.35157894736842105.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.36278607369759663.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.36346722497616446.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3644976709616736.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3662716555381444.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.36840314986403866.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.37400009845775967.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3805341750819337.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3811794762932084.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.38215568827948027.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.38263157894736843.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3838363052466631.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3895378568825545.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3982822764662707.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3988917276102524.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.3998137055972869.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4014009549551818.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4077075348676755.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.41368421052631577.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.41603037785060776.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4166039789272963.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.41747172291509355.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4189656046637005.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.42812323942094593.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4337784792349447.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4343162302443403.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.43512974023290013.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.43653025437221926.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.44141497127759133.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.44473684210526315.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4515265806192818.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.45202848156138425.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4527877575507068.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.454094904080738.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4667086219593374.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.46927468200361877.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.46974073287842827.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.47044577486851336.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.47165955378925667.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4751224076875072.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4757894736842105.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4870227833879558.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.48745298419547217.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.4881037921863201.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.48922420349777546.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5047708847722928.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5051652355125162.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5052940044977288.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5057618095041267.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5067888532062941.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5068421052631579.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5088298440974229.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5225189861566298.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5228774868295603.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5234198268219334.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5243535029148129.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5378947368421052.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5402670875409669.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5405897381466043.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5410778441397401.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5419181526233315.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5425372805073388.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5438793870361202.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5580151889253039.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5583019894636482.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5587358614575467.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5594828023318503.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5689473684210526.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5757632903096409.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5760142407806922.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5762447169172548.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5763938787753534.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.577047452040369.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5824647695745115.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5935113916939779.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5937264920977361.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5940518960931599.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.5946121017488878.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6099521533271706.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.611259493078315.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6114387434147801.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6117099134109666.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6121767514574065.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.621050152112903.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6290075944626521.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.629150994731824.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6293679307287733.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.629741401165925.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6436595897370864.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6467556958469891.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6468632460488679.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6470259480465799.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6473060508744439.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6596355346512944.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.664503797231326.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.664575497365912.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6646839653643866.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6648707005829626.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.682251898615663.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6822877486829559.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6823419826821933.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6824353502914813.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.6982209171896858.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.7.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p/networks/ER_0.7368062997280773.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p_deltas.npz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p_deltas.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p_diameters.npz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/previous results/vary_p_diameters.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deltas/utils_delta.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dynamic_networks/BA_2_T_100_dyanamic_dense.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dynamic_networks/ER_0.03_T_100_dyanamic_dense.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dynamic_networks/SBM_0.3_0.003_T_100_dyanamic_dense.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/networks/BA_2.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/networks/Cycle.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/networks/ER_0.03.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/networks/MultiStar.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/networks/Path.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/networks/SBM_0.3_0.003.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/networks/Star.pdf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codes.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codes.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/BA_3.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/ER_0.09231420833920125.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/Message_final_t_(12,21)_p=1.0_gamma=5.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/SBM_0.1846284166784025_0.001.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20/BA/Communication_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20/BA/Regret_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20/ER/Communication_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20/ER/Regret_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20/SBM/Communication_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20/SBM/Regret_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_dense/BA/Communication_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_dense/BA/Regret_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_dense/ER/Communication_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_dense/ER/Regret_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_dense/SBM/Communication_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_dense/SBM/Regret_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_sparse/BA/Communication_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_sparse/BA/Regret_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_sparse/ER/Communication_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_sparse/ER/Regret_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_sparse/SBM/Communication_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OPODIS2023_figures/heterogeneous_K=20_dynamic_sparse/SBM/Regret_final_t_plot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/computing_deltas.py" beforeDir="false" afterPath="$PROJECT_DIR$/deltas/computing_deltas.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_gamma/networks/ER_0.4_2023.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_gamma/networks/ER_0.4_2024.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.003218297948685432.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.0036840314986403863.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.007824046010856293.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.009222198635284841.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.01.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.011337324605540518.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.014978661367769954.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.025572147395193312.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.026934449952328816.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.02899534192334717.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.032543311076288675.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.03684031498640387.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.03692573435860127.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.04105263157894737.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.0422694140370318.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.043320248779530335.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.0446467012693728.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.04665335924115383.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.04847409866632088.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.05010796078480739.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.06010788234623789.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.06106835016386735.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.06235895258641677.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.06431137655896048.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.06767261049332612.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.0706331707685171.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.0717416660261549.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.07210526315789473.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.07368062997280773.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.07881645154820437.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.08007120390346076.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.08085479657542322.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.08196939387676713.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.0833754497060719.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.08523726020184484.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.09500923338598892.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.09656455293254139.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.09778345522050473.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.09962741119457379.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.1.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.10280190991036356.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.1031578947368421.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.10434060717843296.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.10664301706590593.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.11052094495921161.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.11431265431687841.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.11549570653754873.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.11728542851238043.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.11827680074582293.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.11944017911381465.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.12036655961888228.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.12991058442573994.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.13206075570121542.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.13320795785459272.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.13421052631578947.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.1349434458301871.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.137931209327401.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.1380480435883488.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.14154436810565693.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.14736125994561547.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.14980885708555244.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.15092020917163668.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.15260146314799375.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.15317815178557395.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.15549585903591973.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.15802556165220605.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.164811935465491.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.16526315789473683.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.1675569584698895.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.16863246048868066.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.1702594804658004.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.17175547999826463.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.17306050874443846.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.176445719145408.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.18420157493201933.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.1853050598542265.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.1863447118057246.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.18791749778360706.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.188079502825325.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.1906251584529572.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.19631578947368422.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.19661094419059744.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.199713286505242.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.20305316123856354.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2040569631227686.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.20546291640818048.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2055755151014137.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.20818980816147586.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.211347070185159.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.22080126262290053.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.22104188991842316.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2217692144398126.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.22298085386507602.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.22323353241922034.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.22575445786999465.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.22736842105263158.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.234614637544993.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2351963267289889.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.23854936400723759.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.23917035281809632.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.23948146575685655.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.24089154973702698.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.24331910757851333.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.24624842122491003.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2562974653915746.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2571937170739006.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.25788220490482705.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.25842105263157894.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2585495670548337.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.26088375728703206.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.27287778922801215.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2737817092673803.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2740455667759116.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.27490596839094456.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2762075843726403.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.27844840699555073.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2894736842105263.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2917936681602486.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2926182197079885.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.29386560169044695.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.29472251989123094.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.2960130567040695.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.30658522563792795.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3095417695445856.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3103304710250325.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3115236190082536.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3123670918057717.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.31357770641258825.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.32052631578947366.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3272898709289226.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.32804272234207643.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3291816363260603.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.33114235612110693.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.33156283487763477.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3402926620478438.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.34503797231325967.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.34575497365912045.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.346839653643867.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.34870700582962566.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3509524743441631.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.35157894736842105.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.36278607369759663.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.36346722497616446.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3644976709616736.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3662716555381444.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.36840314986403866.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.37400009845775967.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3805341750819337.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3811794762932084.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.38215568827948027.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.38263157894736843.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3838363052466631.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3895378568825545.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3982822764662707.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3988917276102524.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.3998137055972869.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4014009549551818.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4077075348676755.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.41368421052631577.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.41603037785060776.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4166039789272963.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.41747172291509355.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4189656046637005.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.42812323942094593.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4337784792349447.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4343162302443403.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.43512974023290013.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.43653025437221926.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.44141497127759133.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.44473684210526315.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4515265806192818.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.45202848156138425.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4527877575507068.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.454094904080738.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4667086219593374.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.46927468200361877.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.46974073287842827.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.47044577486851336.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.47165955378925667.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4751224076875072.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4757894736842105.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4870227833879558.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.48745298419547217.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.4881037921863201.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.48922420349777546.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5047708847722928.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5051652355125162.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5052940044977288.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5057618095041267.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5067888532062941.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5068421052631579.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5088298440974229.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5225189861566298.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5228774868295603.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5234198268219334.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5243535029148129.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5378947368421052.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5402670875409669.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5405897381466043.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5410778441397401.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5419181526233315.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5425372805073388.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5438793870361202.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5580151889253039.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5583019894636482.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5587358614575467.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5594828023318503.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5689473684210526.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5757632903096409.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5760142407806922.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5762447169172548.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5763938787753534.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.577047452040369.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5824647695745115.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5935113916939779.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5937264920977361.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5940518960931599.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.5946121017488878.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6099521533271706.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.611259493078315.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6114387434147801.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6117099134109666.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6121767514574065.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.621050152112903.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6290075944626521.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.629150994731824.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6293679307287733.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.629741401165925.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6436595897370864.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6467556958469891.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6468632460488679.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6470259480465799.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6473060508744439.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6596355346512944.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.664503797231326.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.664575497365912.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6646839653643866.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6648707005829626.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.682251898615663.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6822877486829559.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6823419826821933.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6824353502914813.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.6982209171896858.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.7.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p/networks/ER_0.7368062997280773.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p_deltas.npz" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p_deltas.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p_diameters.npz" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deltas/vary_p_diameters.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/network_animation.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/network_animation.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/network_animation.py" beforeDir="false" afterPath="$PROJECT_DIR$/network_animation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plotting.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/plotting.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils_delta.py" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Jupyter Notebook" />
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2KJIkMXAEYw4MjuVioE0sU9tVex" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;random-stop&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Nick/Dropbox/OSI,OptiML/implicit-bias-momentum/LDN_Momentum&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;Jupyter&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.network_animation">
+    <configuration name="algorithms" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="codes" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/algorithms.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="codes" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="network_animation" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="codes" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/network_animation.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="utilities" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="codes" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utilities.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.utilities" />
+        <item itemvalue="Python.network_animation" />
+        <item itemvalue="Python.algorithms" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c6a9944a-1b5b-453a-8f83-4329c8c58a0c" name="Changes" comment="" />
+      <created>1673686401077</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1673686401077</updated>
+      <workItem from="1673686402463" duration="32000" />
+      <workItem from="1673686810360" duration="2238000" />
+      <workItem from="1673798525050" duration="6573000" />
+      <workItem from="1673805181080" duration="17000" />
+      <workItem from="1673805207684" duration="7475000" />
+      <workItem from="1673847149338" duration="36000" />
+      <workItem from="1673848353191" duration="4483000" />
+      <workItem from="1673917162910" duration="4317000" />
+      <workItem from="1675088312172" duration="20000" />
+      <workItem from="1675402893716" duration="5513000" />
+      <workItem from="1675428332439" duration="5610000" />
+      <workItem from="1675474506964" duration="12403000" />
+      <workItem from="1675500497394" duration="1015000" />
+      <workItem from="1675502027208" duration="193000" />
+      <workItem from="1675523442323" duration="51000" />
+      <workItem from="1675601618870" duration="10728000" />
+      <workItem from="1675615679437" duration="19198000" />
+      <workItem from="1675657042947" duration="746000" />
+      <workItem from="1675659204135" duration="29000" />
+      <workItem from="1675659427514" duration="4013000" />
+      <workItem from="1675666281953" duration="2000000" />
+      <workItem from="1675672391039" duration="2278000" />
+      <workItem from="1675755335091" duration="13197000" />
+      <workItem from="1675831885031" duration="12524000" />
+      <workItem from="1675914575298" duration="702000" />
+      <workItem from="1676125847875" duration="7296000" />
+      <workItem from="1676191390955" duration="4717000" />
+      <workItem from="1676262394051" duration="22493000" />
+      <workItem from="1676357380946" duration="6904000" />
+      <workItem from="1676711976329" duration="142000" />
+      <workItem from="1676716662996" duration="2527000" />
+      <workItem from="1676800155818" duration="7008000" />
+      <workItem from="1677041970466" duration="1914000" />
+      <workItem from="1677047180728" duration="401000" />
+      <workItem from="1677072898445" duration="1203000" />
+      <workItem from="1677085418267" duration="859000" />
+      <workItem from="1677128757885" duration="16000" />
+      <workItem from="1677128836844" duration="31000" />
+      <workItem from="1677130308657" duration="471000" />
+      <workItem from="1677132601704" duration="1810000" />
+      <workItem from="1677303683471" duration="4093000" />
+      <workItem from="1677316302297" duration="38000" />
+      <workItem from="1677316391038" duration="210000" />
+      <workItem from="1677317632717" duration="82000" />
+      <workItem from="1677317784082" duration="25000" />
+      <workItem from="1677340238493" duration="33000" />
+      <workItem from="1677340318686" duration="24000" />
+      <workItem from="1677406166015" duration="1298000" />
+      <workItem from="1677470205392" duration="1579000" />
+      <workItem from="1677686462221" duration="26000" />
+      <workItem from="1677686529607" duration="554000" />
+      <workItem from="1677872450086" duration="5527000" />
+      <workItem from="1678160423426" duration="5968000" />
+      <workItem from="1678253951569" duration="63000" />
+      <workItem from="1678263211062" duration="219000" />
+      <workItem from="1678283512863" duration="603000" />
+      <workItem from="1678343960754" duration="6918000" />
+      <workItem from="1678367680026" duration="2000" />
+      <workItem from="1678436425490" duration="257000" />
+      <workItem from="1681122199840" duration="156000" />
+      <workItem from="1681190259460" duration="720000" />
+      <workItem from="1681798888694" duration="174000" />
+      <workItem from="1681799072843" duration="118000" />
+      <workItem from="1681799203242" duration="640000" />
+      <workItem from="1681800042567" duration="55000" />
+      <workItem from="1681800110782" duration="599000" />
+      <workItem from="1681882131341" duration="151000" />
+      <workItem from="1681882306277" duration="1514000" />
+      <workItem from="1685360210700" duration="28495000" />
+      <workItem from="1686818810186" duration="627000" />
+      <workItem from="1686819451824" duration="2734000" />
+      <workItem from="1688470801171" duration="46000" />
+      <workItem from="1688470859886" duration="631000" />
+      <workItem from="1688529759223" duration="20000" />
+      <workItem from="1688709906379" duration="447000" />
+      <workItem from="1688710656961" duration="825000" />
+      <workItem from="1688717734600" duration="14144000" />
+      <workItem from="1689048176447" duration="1893000" />
+      <workItem from="1689052687843" duration="827000" />
+      <workItem from="1689091946770" duration="258000" />
+      <workItem from="1689137318532" duration="136000" />
+      <workItem from="1689921812695" duration="598000" />
+      <workItem from="1689923224097" duration="1200000" />
+      <workItem from="1690209459315" duration="367000" />
+      <workItem from="1691373718776" duration="312000" />
+      <workItem from="1691390745402" duration="5000" />
+      <workItem from="1691631602514" duration="8000" />
+      <workItem from="1691631638334" duration="3502000" />
+      <workItem from="1691642701199" duration="86000" />
+      <workItem from="1691642797834" duration="3062000" />
+      <workItem from="1691717416623" duration="1853000" />
+      <workItem from="1691849851306" duration="30000" />
+      <workItem from="1691991723427" duration="6000" />
+      <workItem from="1692339836167" duration="2417000" />
+      <workItem from="1692342381533" duration="19459000" />
+      <workItem from="1692593212693" duration="7258000" />
+      <workItem from="1692766795509" duration="3329000" />
+      <workItem from="1692854589390" duration="62000" />
+      <workItem from="1692942935158" duration="599000" />
+      <workItem from="1692951369888" duration="4000" />
+      <workItem from="1692952131750" duration="37000" />
+      <workItem from="1692953179225" duration="268000" />
+      <workItem from="1693037085193" duration="206000" />
+      <workItem from="1693037313064" duration="29000" />
+      <workItem from="1693037477459" duration="264000" />
+      <workItem from="1693042164528" duration="2383000" />
+      <workItem from="1693199265385" duration="3721000" />
+      <workItem from="1693217205973" duration="640000" />
+      <workItem from="1693296459742" duration="2895000" />
+      <workItem from="1693312500092" duration="1286000" />
+      <workItem from="1693313902455" duration="24000" />
+      <workItem from="1693383894591" duration="69000" />
+      <workItem from="1693384537452" duration="8000" />
+      <workItem from="1693393925442" duration="618000" />
+      <workItem from="1693406139454" duration="16171000" />
+      <workItem from="1693478950910" duration="56000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/codes$main.coverage" NAME="main Coverage Results" MODIFIED="1675775327571" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/codes$utilities.coverage" NAME="utilities Coverage Results" MODIFIED="1673804799438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/codes$algorithms.coverage" NAME="algorithms Coverage Results" MODIFIED="1675676706407" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/codes$network_animation.coverage" NAME="network_animation Coverage Results" MODIFIED="1689040739499" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>

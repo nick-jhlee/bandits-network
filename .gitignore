@@ -1,3 +1,10 @@
 results*/
 arm_sets*
 means*
+networks/
+dynamic_networks/
+OPODIS2023*/
+deltas/networks/
+deltas/previous*
+deltas/results*
+deltas/final_results/

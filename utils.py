@@ -29,12 +29,21 @@ def plot(Regrets, Group_Regrets, Network, titles, fnames):
 def plot_final(final_means, final_stds, xs, title, xlabel, fname, legends=None):
     fig, ax = plt.subplots()
     clrs = sns.color_palette("husl", len(final_means))
+    if len(clrs) > 1:
+        clrs[0], clrs[1] = clrs[1], clrs[0]
     legend_available = legends is not None and len(legends) > 0
 
     with sns.axes_style("whitegrid"):
         for i, color in enumerate(clrs):
             if legend_available:
-                ax.plot(xs, final_means[i], label=legends[i], c=color)
+                if i==1:
+                    ax.plot(xs, final_means[i], label=legends[i], c=color)
+                else:
+                    # ax.plot(xs, final_means[i], label=legends[i], c=color)
+                    if "Regret" in title:
+                        ax.plot(xs, final_means[i], label=legends[i], c=color, alpha=0.2)
+                    else:
+                        ax.plot(xs, final_means[i], label=legends[i], c=color, alpha=0.4)
             else:
                 ax.plot(xs, final_means[i], c=color)
             ax.fill_between(xs, final_means[i] - final_stds[i], final_means[i] + final_stds[i],

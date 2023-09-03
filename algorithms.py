@@ -188,26 +188,27 @@ class Agent:
                 RS_p = float(re.findall(r"[\d\.\d]+", self.mp)[0])
                 # if it's randomly stopped, then delete the message
                 if np.random.binomial(1, RS_p) == 1:
-                    self.message_absorption_times.append(message.original_gamma - message.gamma)
+                    # self.message_absorption_times.append(message.original_gamma - message.gamma)
                     del message
                 else:
                     if message.arm in self.arm_set:
                         self.total_visitations[message.arm] += 1
                         self.total_rewards[message.arm] += message.reward
                     self.store_message(message)
-            elif "Flooding" in self.mp:
-                if message.arm in self.arm_set:
-                    self.total_visitations[message.arm] += 1
-                    self.total_rewards[message.arm] += message.reward
-                    if "Absorption" in self.mp:
-                        self.message_absorption_times.append(message.original_gamma - message.gamma)
-                        del message
+            else:
+                if "Flooding" in self.mp:
+                    if message.arm in self.arm_set:
+                        self.total_visitations[message.arm] += 1
+                        self.total_rewards[message.arm] += message.reward
+                        if "Absorption" in self.mp:
+                            self.message_absorption_times.append(message.original_gamma - message.gamma)
+                            del message
+                        else:
+                            self.store_message(message)
                     else:
                         self.store_message(message)
                 else:
-                    self.store_message(message)
-            else:
-                del message
+                    del message
         else:
             del message
 
@@ -222,7 +223,6 @@ def update_network(Network, p, q):
         if np.random.binomial(1, q) == 1:
             Network.remove_edge(edge[0], edge[1])
 
-
 def run_ucb(problem, p):
     # reseeding
     np.random.seed()
@@ -232,21 +232,30 @@ def run_ucb(problem, p):
     Agents, Network = problem.Agents, problem.Network
     n_gossip, mp = problem.n_gossip, problem.mp
 
+    # for networks not SBM:
+    tmp = list(Network.edges())
+    if len(tmp) > 0:
+        fixed_edge = tmp[0]
+    else:
+        fixed_edge = None
     # for logging
     Regrets = [[0 for _ in range(T)] for _ in range(N)]
     Communications = [[0 for _ in range(T)] for _ in range(N)]
-    Edge_Messages = [0 for _ in range(T)]  # for (12, 21), which is a sparse edge
+    Edge_Messages = [0 for _ in range(T)]
 
     # run UCB
     # for t in tqdm(range(T)):
-    dynamic_p_sparse, dynamic_q_sparse = 0.04 / N, 1 / N
-    dynamic_p_dense, dynamic_q_dense = 0.1 / N, 0.2 / N
+    dynamic_p_very_sparse, dynamic_q_very_sparse = 0.0, 0.8
+    dynamic_p_sparse, dynamic_q_sparse = 1e-3, 5e-3
+    dynamic_p_dense, dynamic_q_dense = 1e-3, 1e-3
     for t in range(T):
-        if "dyanamic_sparse" in mp:
+        if "dynamic_sparse" in mp:
             update_network(Network, dynamic_p_sparse, dynamic_q_sparse)
-        elif "dyanamic_dense" in mp:
+        elif "_dynamic_very_sparse" in mp:
+            update_network(Network, dynamic_p_very_sparse, dynamic_q_very_sparse)
+        elif "dynamic_dense" in mp:
             update_network(Network, dynamic_p_dense, dynamic_q_dense)
-        elif "dyanamic_hybrid" in mp:
+        elif "dynamic_hybrid" in mp:
             if t < T // 3:
                 update_network(Network, dynamic_p_dense, dynamic_q_dense)
             else:
@@ -262,7 +271,10 @@ def run_ucb(problem, p):
         #         center = np.random.randint(N)
         #         Network.add_edges_from([(center, i) for i in range(N) if i != center])
 
-        original_edges = list(Network.edges())
+        # original_edges = list(Network.edges())
+        # # failure of entire packet of messages, for each link
+        # linkfailures = {edge: np.random.binomial(1, p) for edge in original_edges}
+        # linkfailures.update({(edge[1], edge[0]): linkfailures[edge] for edge in original_edges})
 
         # # fail edges randomly w.p. 1-p, i.i.d. -> for temporally changing graphs
         # failed_edges = [edge for edge in original_edges if np.random.binomial(1, p) == 0]
@@ -293,22 +305,17 @@ def run_ucb(problem, p):
         #     for t, regret in enumerate(regrets_v):
         #         Regrets[v][t] = regret
 
-        # failure of entire packet of messages, for each link
-        linkfailures = {edge: np.random.binomial(1, p) for edge in original_edges}
-        linkfailures.update({(edge[1], edge[0]): linkfailures[edge] for edge in original_edges})
-
         # information sharing(dissemination)
         for v in range(N):
             messages = total_messages[v]
 
-            if mp == "baseline" or ("bandwidth" in mp and len(messages) >= 150):
+            if "baseline" in mp or ("bandwidth" in mp and len(messages) >= 150):
                 del messages
             else:
                 neighbors = Network.adj[v]
                 # message intereference, if applicable
-                if "interfere" in problem.mp:
+                if "interfere" in mp:
                     messages = interfere(messages)
-
                 # message broadcasting
                 while messages:
                     message = messages.pop()
@@ -328,15 +335,22 @@ def run_ucb(problem, p):
                                 message_copy = deepcopy(message)
                                 # update communication complexity
                                 Agents[v].communication += 1
-                                # update number of messages for (12, 21) (for SBM)
-                                if (v==12 and neighbor==21) or (v==21 and neighbor==12):
-                                    Edge_Messages[t] += 1
+                                # update number of messages for (12, 21) (for small SBM) or (11, 53) (for large SBM)
+                                # if (v==12 and neighbor==21) or (v==21 and neighbor==12):
+                                if "SBM" in Network.name:
+                                    if (v == 11 and neighbor == 53) or (v == 53 and neighbor == 11):
+                                        Edge_Messages[t] += 1
+                                else:
+                                    if fixed_edge is not None:
+                                        if (v == fixed_edge[0] and neighbor == fixed_edge[1]) or (v == fixed_edge[1] and neighbor == fixed_edge[0]):
+                                            Edge_Messages[t] += 1
                                 # delete message if it has already been observed
                                 if message_copy.hash_value in Agents[neighbor].history:
                                     del message_copy
                                 else:
                                     # send messages
-                                    if linkfailures[(v, neighbor)] == 0:  # failure of entire packet of messages
+                                    if False:
+                                    # if linkfailures[(v, neighbor)] == 0:  # failure of entire packet of messages
                                         Agents[neighbor].receive(None)
                                     else:
                                         # update hash value history
@@ -353,13 +367,13 @@ def run_ucb(problem, p):
     # Group_Regrets = np.max(np.array(Regrets), axis=0)
     Group_Regrets = np.sum(np.array(Regrets), axis=0)
     Group_Communications = np.sum(np.array(Communications), axis=0)
+    combined_metrics = np.sum(np.log(np.array(Communications) + 2)*Regrets, axis=0)
+    # # message absorption times
+    # message_absorption_times = []
+    # for Agent in Agents:
+    #     message_absorption_times += Agent.message_absorption_times
 
-    # message absorption times
-    message_absorption_times = []
-    for Agent in Agents:
-        message_absorption_times += Agent.message_absorption_times
-
-    return Group_Regrets, Group_Communications, np.array(Edge_Messages), message_absorption_times
+    return Group_Regrets, Group_Communications, np.array(Edge_Messages), combined_metrics
 
 
 def interfere(messages):
