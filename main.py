@@ -394,7 +394,7 @@ if __name__ == '__main__':
 
         # experiments
         # for dynamic in ["", "_dynamic_sparse", "_dynamic_dense", "_dynamic_hybrid"]:
-        for dynamic in ["_dynamic_dense", "_dynamic_hybrid"]:
+        for dynamic in ["_dynamic_dense"]:
             if dynamic == "":
                 RGs = ['ER', 'BA', 'SBM']
             else:
@@ -470,6 +470,7 @@ if __name__ == '__main__':
                 ps = [1.0]
                 main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, n_repeats, path + f"/{RG_model}")
                 plt.clf()
+
 
                 # if dynamic == "":
                 #     # Experiment #1.2 Effect of gamma, under perfect communication

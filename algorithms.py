@@ -214,14 +214,16 @@ class Agent:
 
 
 def update_network(Network, p, q):
-    cur_edges = nx.edges(Network)
-    cur_non_edges = nx.non_edges(Network)
+    Network_copy = deepcopy(Network)
+    cur_edges = nx.edges(Network_copy)
+    cur_non_edges = nx.non_edges(Network_copy)
     for non_edge in cur_non_edges:
         if np.random.binomial(1, p) == 1:
-            Network.add_edge(non_edge[0], non_edge[1])
+            Network_copy.add_edge(non_edge[0], non_edge[1])
     for edge in cur_edges:
         if np.random.binomial(1, q) == 1:
-            Network.remove_edge(edge[0], edge[1])
+            Network_copy.remove_edge(edge[0], edge[1])
+    return Network_copy
 
 def run_ucb(problem, p):
     # reseeding
@@ -244,22 +246,20 @@ def run_ucb(problem, p):
     Edge_Messages = [0 for _ in range(T)]
 
     # run UCB
-    # for t in tqdm(range(T)):
-    dynamic_p_very_sparse, dynamic_q_very_sparse = 0.0, 0.8
-    dynamic_p_sparse, dynamic_q_sparse = 1e-3, 5e-3
-    dynamic_p_dense, dynamic_q_dense = 1e-3, 1e-3
+    dynamic_p_sparse, dynamic_q_sparse = 1e-2, 3e-1
+    dynamic_p_dense, dynamic_q_dense = 1e-2, 1e-1
     for t in range(T):
         if "dynamic_sparse" in mp:
-            update_network(Network, dynamic_p_sparse, dynamic_q_sparse)
+            Network = update_network(Network, dynamic_p_sparse, dynamic_q_sparse)
         elif "_dynamic_very_sparse" in mp:
-            update_network(Network, dynamic_p_very_sparse, dynamic_q_very_sparse)
+            Network = update_network(Network, dynamic_p_very_sparse, dynamic_q_very_sparse)
         elif "dynamic_dense" in mp:
-            update_network(Network, dynamic_p_dense, dynamic_q_dense)
+            Network = update_network(Network, dynamic_p_dense, dynamic_q_dense)
         elif "dynamic_hybrid" in mp:
             if t < T // 3:
-                update_network(Network, dynamic_p_dense, dynamic_q_dense)
+                Network = update_network(Network, dynamic_p_dense, dynamic_q_dense)
             else:
-                update_network(Network, dynamic_p_sparse, dynamic_q_sparse)
+                Network = update_network(Network, dynamic_p_sparse, dynamic_q_sparse)
 
         # ## Network switching
         # if Network.name == "Star":
@@ -319,7 +319,7 @@ def run_ucb(problem, p):
                 # message broadcasting
                 while messages:
                     message = messages.pop()
-                    # if the message is in-tact (e.g., didn't get destroyed in link failure)
+                    # if the message is in-tact
                     if message is not None:
                         # remove the previously originating agent
                         neighbors_new = [nbhd for nbhd in neighbors if nbhd != message.v_prev]

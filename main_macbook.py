@@ -395,7 +395,11 @@ if __name__ == '__main__':
         # experiments
         # for dynamic in ["", "_dynamic_sparse", "_dynamic_dense", "_dynamic_hybrid"]:
         for dynamic in ["_dynamic_sparse"]:
-            for RG_model in ['ER']:
+            if dynamic == "":
+                RGs = ['ER', 'BA', 'SBM']
+            else:
+                RGs = ['ER']
+            for RG_model in RGs:
                 print(f"{dynamic} {RG_model}, {uniform}; N={N},K={K},k={k},T={T}")
                 path = f"{base_path}/heterogeneous_K={K}{dynamic}"
                 # create paths
@@ -467,10 +471,12 @@ if __name__ == '__main__':
                 main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, n_repeats, path + f"/{RG_model}")
                 plt.clf()
 
+
                 # if dynamic == "":
                 #     # Experiment #1.2 Effect of gamma, under perfect communication
                 #     gammas = [1, 2, 3, 4, 5, 6, 7, 8, 9]  # max (or avg for Poisson time) number of rounds for message passing
                 #     ps = [1.0]
+                #     T = 100
                 #     main_parallel(Network, Agents, T, N, K, mps, n_gossips, gammas, ps, n_repeats, path + f"/{RG_model}")
                 #     plt.clf()
 
