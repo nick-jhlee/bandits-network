@@ -132,15 +132,12 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
         total_regret = np.zeros((n_repeats, length))
         total_communication = np.zeros((n_repeats, length))
         edge_messages = np.zeros((n_repeats, length))
-        # message_absorption_times = []
-        combined_metrics = np.zeros((n_repeats, length))
 
         for repeat, i in product(range(n_repeats), range(length)):
             if exp_type == "vary_t":
                 idx = params.index(partial_param + (gamma, p, repeat))
                 total_regret[repeat][i] = everything[idx][0][i]
                 total_communication[repeat][i] = everything[idx][1][i]
-                combined_metrics[repeat][i] = everything[idx][3][i]
                 # if i == 0:
                 #     message_absorption_times += everything[idx][3]
                 # number of messages passing through the bottleneck edge!
@@ -156,8 +153,7 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
                 total_regret[repeat][i] = everything[idx][0][-1]
                 total_communication[repeat][i] = everything[idx][1][-1]
 
-        return total_regret, total_communication, edge_messages, combined_metrics
-        # return total_regret, total_communication, edge_messages, message_absorption_times
+        return total_regret, total_communication, edge_messages
 
     # collect datas in parallel
     partial_params = list(product(mps, n_gossips))
@@ -176,15 +172,12 @@ def main_parallel(Network, Agents_, T, N, K, mps, n_gossips, gammas, ps, n_repea
     final_regrets_mean, final_regrets_std = [], []
     final_communications_mean, final_communications_std = [], []
     final_messages_mean, final_messages_std = [], []
-    final_metrics_mean, final_metrics_std = [], []
-    for total_regret, total_communication, edge_message, total_metric in finals:
+    for total_regret, total_communication, edge_message in finals:
     # for total_regret, total_communication, edge_message, total_absorption_time in finals:
         final_regrets_mean.append(np.mean(total_regret, axis=0))
         final_regrets_std.append(np.std(total_regret, axis=0))
         final_communications_mean.append(np.mean(total_communication, axis=0))
         final_communications_std.append(np.std(total_communication, axis=0))
-        final_metrics_mean.append(np.mean(total_metric, axis=0))
-        final_metrics_std.append(np.std(total_metric, axis=0))
         # final_absorption_times.append(total_absorption_time)
         final_messages_mean.append(np.mean(edge_message, axis=0))
         final_messages_std.append(np.std(edge_message, axis=0))

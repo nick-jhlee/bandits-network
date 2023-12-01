@@ -6,8 +6,6 @@ from math import inf, log
 import random
 
 from tqdm import tqdm
-import multiprocess
-from multiprocess import Pool
 from copy import deepcopy
 from itertools import combinations
 
@@ -367,13 +365,12 @@ def run_ucb(problem, p):
     # Group_Regrets = np.max(np.array(Regrets), axis=0)
     Group_Regrets = np.sum(np.array(Regrets), axis=0)
     Group_Communications = np.sum(np.array(Communications), axis=0)
-    combined_metrics = np.sum(np.log(np.array(Communications) + 2)*Regrets, axis=0)
     # # message absorption times
     # message_absorption_times = []
     # for Agent in Agents:
     #     message_absorption_times += Agent.message_absorption_times
 
-    return Group_Regrets, Group_Communications, np.array(Edge_Messages), combined_metrics
+    return Group_Regrets, Group_Communications, np.array(Edge_Messages)
 
 
 def interfere(messages):
